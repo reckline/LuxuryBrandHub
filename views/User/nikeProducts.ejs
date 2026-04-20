@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -101,14 +102,14 @@
         <!-- =========== 2nd Header -->
 
 
-      <%- include('../partials/secondHeader') %>
+    <%- include('../partials/secondHeader') %>
 
 
         <!-- =================================== Body Start ===================================== -->
 
 
         <div style=" margin-top: 1rem;">
-            <form method="GET" action="/hoka" style="margin-bottom:1rem; display: flex; justify-content: center;">
+            <form method="GET" action="/nike" style="margin-bottom:1rem; display: flex; justify-content: center;">
                 <select name="gender" onchange="this.form.submit()" style="padding:8px 12px; border-radius:6px; width: 90%;">
 
                     <option value="all" <%=selectedGender==='all' ? 'selected' : '' %>>
@@ -130,7 +131,7 @@
 
                 <% if (products.length === 0) { %>
   <p style="text-align:center; font-size:1.2rem;">
-    No Adidas products available
+    No Nike products available
   </p>
 <% } %>
 

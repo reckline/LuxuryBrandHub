@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Cancelled Orders</title>
-  <link rel="stylesheet" href="/css/admin-newoder.css">
-      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-</head>
+  <head>
+    <title>Cancelled Orders</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/admin-newoder.css" />
+  </head>
 
-<body>
-
-      <div
+  <body>
+    <div
       class="sidebar-overlay"
       id="sidebarOverlay"
       onclick="toggleSidebar()"
@@ -25,93 +27,98 @@
       ></i>
     </header>
 
-<%- include("../partials/adminNavBar") %>
+    <%- include("../partials/adminNavBar") %>
 
-<main class="main-content">
+    <main class="main-content">
+      <h1>❌ Cancelled Orders</h1>
+      <p>Orders cancelled by users or admin</p>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>User</th>
+              <th>Products</th>
+              <th>Total</th>
+              <th>Cancelled By</th>
+              <th>Reason</th>
+              <th>Date</th>
+            </tr>
+          </thead>
 
-<h1>❌ Cancelled Orders</h1>
-<p>Orders cancelled by users or admin</p>
+          <tbody>
+            <% if (orders.length === 0) { %>
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 20px">
+                No Cancelled Orders
+              </td>
+            </tr>
+            <% } %> <% orders.forEach(order => { %>
+            <tr>
+              <!-- Order ID -->
+              <td>#<%= order._id.toString().slice(-6).toUpperCase() %></td>
 
-<table>
-  <thead>
-    <tr>
-      <th>Order ID</th>
-      <th>User</th>
-      <th>Products</th>
-      <th>Total</th>
-      <th>Cancelled By</th>
-      <th>Reason</th>
-      <th>Date</th>
-    </tr>
-  </thead>
+              <!-- User -->
+              <td>
+                <%= order.user?.username || "Guest" %><br />
+                <small><%= order.user?.phoneNo || order.mobile %></small>
+              </td>
 
-  <tbody>
+              <!-- Products -->
+              <td>
+                <% order.items.forEach(item => { %>
+                <div
+                  style="
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 8px;
+                    align-items: center;
+                  "
+                >
+                  <img
+                    src="<%= item.product.images[0] %>"
+                    width="45"
+                    style="border-radius: 6px"
+                  />
+                  <div>
+                    <strong><%= item.product.title %></strong><br />
+                    <small
+                      >Qty: <%= item.qty %> <% if(item.size){ %> | Size: <%=
+                      item.size %> <% } %></small
+                    >
+                  </div>
+                </div>
+                <% }) %>
+              </td>
 
-  <% if (orders.length === 0) { %>
-    <tr>
-      <td colspan="7" style="text-align:center;padding:20px;">
-        No Cancelled Orders
-      </td>
-    </tr>
-  <% } %>
+              <!-- Total -->
+              <td>₹<%= order.totalAmount %></td>
 
-  <% orders.forEach(order => { %>
-    <tr>
+              <!-- Cancelled By -->
+              <td>
+                <% if(order.cancelled.cancelledBy === "user"){ %>
+                <span style="color: red; font-weight: bold">User</span>
+                <% } else if(order.cancelled.cancelledBy === "admin"){ %>
+                <span style="color: blue; font-weight: bold">Admin</span>
+                <% } else { %>
+                <span>-</span>
+                <% } %>
+              </td>
 
-      <!-- Order ID -->
-      <td>#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+              <!-- Reason -->
+              <td><%= order.cancelled.cancelReason || "Not specified" %></td>
 
-      <!-- User -->
-      <td>
-        <%= order.user?.username || "Guest" %><br>
-        <small><%= order.user?.phoneNo || order.mobile %></small>
-      </td>
-
-      <!-- Products -->
-      <td>
-        <% order.items.forEach(item => { %>
-          <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center;">
-            <img src="<%= item.product.images[0] %>" width="45" style="border-radius:6px;">
-            <div>
-              <strong><%= item.product.title %></strong><br>
-              <small>Qty: <%= item.qty %> <% if(item.size){ %> | Size: <%= item.size %> <% } %></small>
-            </div>
-          </div>
-        <% }) %>
-      </td>
-
-      <!-- Total -->
-      <td>₹<%= order.totalAmount %></td>
-
-      <!-- Cancelled By -->
-      <td>
-        <% if(order.cancelled.cancelledBy === "user"){ %>
-          <span style="color:red;font-weight:bold;">User</span>
-        <% } else if(order.cancelled.cancelledBy === "admin"){ %>
-          <span style="color:blue;font-weight:bold;">Admin</span>
-        <% } else { %>
-          <span>-</span>
-        <% } %>
-      </td>
-
-      <!-- Reason -->
-      <td>
-        <%= order.cancelled.cancelReason || "Not specified" %>
-      </td>
-
-      <!-- Date -->
-      <td>
-        <%= new Date(order.cancelled.cancelledAt).toLocaleDateString("en-IN") %>
-      </td>
-
-    </tr>
-  <% }) %>
-
-  </tbody>
-</table>
-
-</main>
-
-</body>
-<script src="/js/shoesProduct.js"></script>
+              <!-- Date -->
+              <td>
+                <%= new
+                Date(order.cancelled.cancelledAt).toLocaleDateString("en-IN") %>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+  <script src="/js/shoesProduct.js"></script>
 </html>

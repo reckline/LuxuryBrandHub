@@ -108,8 +108,8 @@
 
 
         <div style=" margin-top: 1rem;">
-            <form method="GET" action="/sliders" style="margin-bottom:1rem;">
-                <select name="gender" onchange="this.form.submit()" style="padding:8px 12px; border-radius:6px;">
+            <form method="GET" action="/sliders" style="margin-bottom:1rem; display: flex; justify-content: center;">
+                <select name="gender" onchange="this.form.submit()" style="padding:8px 12px; border-radius:6px; width: 90%;">
 
                     <option value="all" <%=selectedGender==='all' ? 'selected' : '' %>>
                         All

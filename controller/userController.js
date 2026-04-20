@@ -1149,19 +1149,40 @@ exports.getViewProduct = async (req, res, next) => {
     }
 
     // 👤 USER (for cart check)
-    const user = await User.findById(req.session.user._id);
+    // const user = await User.findById(req.session.user._id);
 
-    const isInCart = user.cart.some(
-      (item) => item.product.toString() === productId
-    );
+    // const isInCart = user.cart.some(
+    //   (item) => item.product.toString() === productId
+    // );
 
-    res.render("User/view-product", {
-      pageTitle: product.title,
-      product,
-      isInCart,
-      user: req.session.user,
-      isLoggedIn: req.session.isLoggedIn,
-    });
+    // res.render("User/view-product", {
+    //   pageTitle: product.title,
+    //   product,
+    //   isInCart,
+    //   user: req.session.user,
+    //   isLoggedIn: req.session.isLoggedIn,
+    // });
+
+    // 👤 USER (for cart check)
+const user = await User.findById(req.session.user._id);
+
+const isInCart = user.cart.some(
+  (item) => item.product.toString() === productId
+);
+
+// temporary wishlist array
+const wishlistIds = [];
+
+res.render("User/view-product", {
+  pageTitle: product.title,
+  product,
+  isInCart,
+  wishlistIds, // 👈 यह add करना जरूरी है
+  razorpayKey: process.env.RAZORPAY_KEY_ID, // 👈 Razorpay key
+  user: req.session.user,
+  isLoggedIn: req.session.isLoggedIn,
+});
+
   } catch (err) {
     console.error("View product error:", err);
     next(err);
@@ -1681,3 +1702,70 @@ exports.cancelOrder = async (req, res) => {
     res.json({ success: false });
   }
 };
+
+
+
+
+
+// ooooooooooooooooooo
+
+exports.getNikeProducts = async (req, res, next) => {
+  try {
+    const gender = req.query.gender || "all";
+
+    let query = {
+      category: "shoes", // 👟 Nike shoes
+      brand: "NIKE", // 👟 Nike brand filter
+      status: "active",
+    };
+
+    // 👇 gender filter
+    if (gender !== "all") {
+      query.gender = gender;
+    }
+
+    // ===============================
+    // 🔐 NOT LOGGED IN (Guest user)
+    // ===============================
+    if (!req.session.isLoggedIn || !req.session.user) {
+      const nikeProducts = await Product.find(query).sort({ createdAt: -1 });
+
+      return res.render("User/nikeProducts", {
+        products: nikeProducts,
+        selectedGender: gender,
+        isLoggedIn: false,
+        user: null,
+      });
+    }
+
+    // ===============================
+    // 🔍 FETCH USER
+    // ===============================
+    const user = await User.findById(req.session.user._id);
+
+    // ❌ USER DELETED
+    if (!user) {
+      return req.session.destroy(() => res.redirect("/login"));
+    }
+
+    // ❌ ONLY USER ROLE ALLOWED
+    if (user.role !== "user") {
+      return req.session.destroy(() => res.redirect("/login"));
+    }
+
+    // ===============================
+    // ✅ LOGGED IN USER
+    // ===============================
+    const nikeProducts = await Product.find(query).sort({ createdAt: -1 });
+
+    res.render("User/nikeProducts", {
+      products: nikeProducts,
+      selectedGender: gender,
+      isLoggedIn: req.session.isLoggedIn,
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Get Nike Products Error:", error);
+    next(error);
+  }
+}

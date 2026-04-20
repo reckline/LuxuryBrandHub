@@ -3,6 +3,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 
 const uploadToPhpServer = async (filePath) => {
+   console.log("FILE PATH:", filePath);   // 👈 यहाँ add करो
   const form = new FormData();
 
   form.append("image", fs.createReadStream(filePath));

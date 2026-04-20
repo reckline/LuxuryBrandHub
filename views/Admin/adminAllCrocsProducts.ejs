@@ -7,7 +7,28 @@
   <title>Manage Products | <%-admin.username%></title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/admin-product.css">
+<script src="https://cdn.tailwindcss.com"></script>
 
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: #f0f2f5;
+  }
+  /* 2 लाइन के बाद ... दिखाने के लिए */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* Premium Glass Effect */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+  }
+</style>
 </head>
 
 <body>
@@ -53,7 +74,7 @@
       </button>
     </header>
 
-    <div class="product-grid">
+    <!-- <div class="product-grid">
       <% products.forEach(product=> { %>
         <div class="product-card">
           <img src="<%= product.images[0] %>" class="product-img" />
@@ -100,89 +121,177 @@
           </div>
         </div>
         <% }) %>
-    </div>
+    </div> -->
 
+    <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-6">
+  <% products.forEach(product=> { %>
+    <div class="product-card group relative glass-card rounded-[2.5rem] border border-white shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col">
+      
+      <div class="absolute top-5 left-5 right-5 z-10 flex justify-between items-center">
+        <span class="bg-black text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg">
+          <%= product.brand %>
+        </span>
+        <span class="<%= product.status === 'active' ? 'bg-green-500' : 'bg-red-500' %> text-white text-[9px] font-black uppercase px-3 py-1 rounded-full shadow-md shadow-green-200/50">
+          <%= product.status === "active" ? "Live" : "Hidden" %>
+        </span>
+      </div>
+
+      <div class="relative aspect-square overflow-hidden bg-gray-100">
+        <img src="<%= product.images[0] %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute bottom-4 left-5">
+           <span class="bg-white/90 backdrop-blur-md text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm">
+            <%= product.gender.toUpperCase() %>
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-xl font-extrabold text-gray-900 tracking-tight mb-2 truncate group-hover:text-blue-600 transition-colors">
+          <%= product.title %>
+        </h3>
+        <p class="text-gray-400 text-xs line-clamp-2 mb-5 leading-relaxed italic">
+          <%= product.description %>
+        </p>
+
+        <div class="flex items-center gap-3 mb-6">
+          <% if(product.offerPercentage > 0) { %>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-red-400 line-through">₹<%= product.price %></span>
+              <span class="text-2xl font-black text-gray-900 leading-none tracking-tighter text-blue-600">₹<%= product.offerPrice %></span>
+            </div>
+            <span class="bg-red-50 text-red-600 text-[10px] font-black px-2 py-1 rounded-md border border-blue-100">
+              -<%= product.offerPercentage %>%
+            </span>
+          <% } else { %>
+            <span class="text-2xl font-black text-gray-900 tracking-tighter">₹<%= product.price %></span>
+          <% } %>
+        </div>
+
+        <div class="mb-6">
+          <p class="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-2">Available Sizes</p>
+          <div class="flex flex-wrap gap-1.5">
+            <% product.sizes.forEach(size => { %>
+              <span class="text-[11px] font-bold bg-gray-50 text-gray-500 w-8 h-8 flex items-center justify-center rounded-xl border border-gray-100 group-hover:border-blue-200 group-hover:text-blue-500 transition-all">
+                <%= size %>
+              </span>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-5 border-t border-gray-50 flex items-center justify-between">
+          <div class="flex flex-col">
+            <span class="text-[9px] font-black text-gray-400 uppercase">Stock status</span>
+            <span class="text-sm font-black <%= product.totalStock < 5 ? 'text-red-500 animate-pulse' : 'text-gray-900' %>">
+              <%= product.totalStock %> Left
+            </span>
+          </div>
+          
+          <button class="bg-gray-900 text-white p-4 rounded-2xl hover:bg-blue-600 hover:-rotate-12 transition-all shadow-xl shadow-gray-200 active:scale-90" 
+                  onclick='openEditModal(<%- JSON.stringify(product) %>)'>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
   </main>
 
   <!-- ============================== Add Crocs Modal ===================== -->
 
   <form action="/admin-howmanycrocsuploaded" method="POST" enctype="multipart/form-data">
-    <div class="modal-overlay" id="addModal" style="overflow-y: scroll;">
-      <div class="modal-box" style="overflow-y: scroll; position: relative; top: 1rem;">
-        <!-- <h2>Add New Crocs</h2> -->
+    <div class="modal-overlay" id="addModal">
+      <div class="modal-box">
+       <div class="flex flex-col max-h-[90vh]">
+  
+  <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
+    <h2 class="text-xl font-black tracking-tighter text-gray-900 uppercase">
+      Add New <span class="text-blue-600">Crocs</span>
+    </h2>
+    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Comfortable Clogs & Sport Sandals</p>
+  </div>
 
-        <div class="form-group">
-          <input type="text" name="title" placeholder="Sliders Name" required />
-        </div>
+  <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-5" style="max-height: 60vh;">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Crocs Name</label>
+        <input type="text" name="title" placeholder="Crocs Model Name" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Price (₹)</label>
+        <input type="number" name="price" placeholder="₹ 0.00" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <input type="number" name="price" placeholder="Price (₹)" required />
-        </div>
+    <div class="form-group">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Description</label>
+      <textarea name="description" rows="3" placeholder="Enter material, ventilation details, and strap features..." 
+        class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" required></textarea>
+    </div>
 
-        <div class="form-group">
-          <textarea name="description" rows="3" placeholder="Enter product description" style="width: 100%; border: 1px solid gray;" required></textarea>
-        </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Offer (%)</label>
+        <input type="number" name="offerPercentage" value="0"
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block font-bold">Total Stock</label>
+        <input type="number" name="totalStock" placeholder="Total Stock" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>Offer (%)</label>
-          <input type="number" name="offerPercentage" value="0" />
-        </div>
-
-        <div class="form-group">
-          <input type="number" name="totalStock" placeholder="Total Stock" required />
-        </div>
-
-        <div style="padding: 0.5rem;">
-        <label>Gender</label>
-        <select name="gender" required>
+    <div class="p-5 bg-gray-50 rounded-[2rem] border border-gray-100">
+      <div class="flex flex-col text-center">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Gender</label>
+        <select name="gender" class="bg-transparent border-none font-bold text-gray-900 text-xs text-center focus:ring-0 outline-none cursor-pointer" required>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="unisex">Unisex</option>
         </select>
-        </div>
+      </div>
+    </div>
 
-        <!-- <label>Brand</label>
-        <select name="brand" required>
-          <option>ADIDAS</option>
-          <option>ASICS</option>
-          <option>NB</option>
-          <option>PUMA</option>
-          <option>REEBOK</option>
-          <option>HOKA</option>
-        </select> -->
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 block italic">Select Sizes ✔</label>
+      <div class="flex flex-wrap gap-2 px-1">
+        <% ['6', '6.5', '7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11'].forEach(size => { %>
+          <label class="cursor-pointer group">
+            <input type="checkbox" name="sizes" value="<%= size %>" class="peer hidden" />
+            <span class="w-12 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-[11px] font-black text-gray-400 border border-gray-100 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-lg peer-checked:shadow-blue-100 transition-all uppercase">
+              <%= size %>
+            </span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
 
-        <!-- 🔥 Multiple Images -->
-        <div class="form-group">
-          <input type="file" name="images" accept="image/*" multiple required />
-          <small style="color:gray">
-            Max 4 images • Each max 2MB
-          </small>
-        </div>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-blue-600 uppercase ml-2 block font-bold">Product Images (Max 4)</label>
+      <input type="file" name="images" accept="image/*" multiple 
+        class="w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-white cursor-pointer hover:file:bg-blue-600 transition-all" required />
+      <p class="text-[9px] text-gray-400 italic ml-2">Max 4 images • Each max 2MB</p>
+    </div>
 
+    <input type="hidden" name="category" value="crocs" />
 
-        <!-- Sizes -->
-        <div class="category-box">
-          <div style="padding: 0.5rem;">Select Size ✔</div>
+  </div>
 
-          <label><input type="checkbox" name="sizes" value="6" /> 6</label>
-          <label><input type="checkbox" name="sizes" value="7" /> 7</label>
-          <label><input type="checkbox" name="sizes" value="8" /> 8</label>
-          <label><input type="checkbox" name="sizes" value="9" /> 9</label>
-          <label><input type="checkbox" name="sizes" value="10" /> 10</label>
-          <label><input type="checkbox" name="sizes" value="11" /> 11</label>
-        </div>
-
-        <!-- Hidden -->
-        <input type="hidden" name="category" value="crocs" />
-
-        <div class="modal-btns">
-          <button type="button" class="btn-main btn-cancel" onclick="closeModal('addModal')">
-            Cancel
-          </button>
-          <button type="submit" class="btn-main btn-save">
-            Add Product
-          </button>
-        </div>
+  <div class="p-6 border-t border-gray-50 flex gap-4 bg-white flex-shrink-0">
+    <button type="button" class="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-all" onclick="closeModal('addModal')">
+      Discard
+    </button>
+    <button type="submit" class="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 hover:bg-blue-600 hover:shadow-blue-200 transition-all active:scale-95">
+      Add Product
+    </button>
+  </div>
+</div>
       </div>
     </div>
   </form>
@@ -191,83 +300,105 @@
   <form action="/admin-editcrocsproducts" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="productId" id="editProductId" />
 
-    <div class="modal-overlay" id="editModal" style="overflow-y: scroll;">
-      <div class="modal-box" style="overflow-y: scroll; position: relative; top: 5rem;">
-        <!-- <h2>Edit Product</h2> -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-box">
+       <div class="flex flex-col max-h-[90vh]">
+  
+  <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
+    <h2 class="text-xl font-black tracking-tighter text-gray-900 uppercase">
+      Edit <span class="text-blue-600">Crocs Details</span>
+    </h2>
+  </div>
 
-        <div class="form-group">
-          <input type="text" name="title" id="editName" placeholder=" Crocs Name" required />
-        </div>
+  <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-5" style="max-height: 60vh;">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Crocs Name</label>
+        <input type="text" name="title" id="editName" placeholder="Crocs Name" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Price (₹)</label>
+        <input type="number" name="price" id="editPrice" placeholder="₹ 0.00" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <input type="number" name="price" id="editPrice" placeholder="Price (₹)" required />
-        </div>
+    <div class="form-group">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest">Description</label>
+      <textarea name="description" id="editDescription" rows="3" placeholder="Tell us about the material, comfort, etc." 
+        class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" required></textarea>
+    </div>
 
-        <div class="form-group">
-          <textarea name="description" id="editDescription" rows="3" placeholder="Description" style="width: 100%; border: 1px solid gray;" required></textarea>
-        </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Offer (%)</label>
+        <input type="number" name="offerPercentage" id="editOffer" placeholder="0"
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block font-bold">Total Stock</label>
+        <input type="number" name="totalStock" id="editStock" placeholder="Total Stock" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>Offer (%)</label>
-          <input type="number" name="offerPercentage" id="editOffer" />
-        </div>
-
-        <div class="form-group">
-          <input type="number" name="totalStock" id="editStock" placeholder="Total Stock" />
-        </div>
-
-        <div style="display: flex; justify-content: space-around; padding-bottom: 1rem;">
-
-          <div style="padding: 0.5rem;">
-        <label>Gender</label>
-        <select name="gender" id="editGender">
+    <div class="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-[2rem] border border-gray-100">
+      <div class="flex flex-col text-center">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-1">Gender</label>
+        <select name="gender" id="editGender" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer">
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="unisex">Unisex</option>
         </select>
-          </div>
-
-          <div style="padding: 0.5rem;">
-        <label>Status</label>
-        <select name="status" id="editStatus">
+      </div>
+      <div class="flex flex-col text-center border-l border-gray-200">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-1">Status</label>
+        <select name="status" id="editStatus" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer">
           <option value="active">Show</option>
           <option value="inactive">Hide</option>
         </select>
-          </div>
-        </div>
+      </div>
+    </div>
 
-        <!-- 🔥 EXISTING IMAGES -->
-        <div class="form-group">
-          <label>Current Images</label>
-          <div id="editImagePreview" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-        </div>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 tracking-widest block italic">Select Size ✔</label>
+      <div class="flex flex-wrap gap-2 px-1">
+        <% ['6', '6.5', '7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'].forEach(size => { %>
+          <label class="cursor-pointer group relative">
+            <input type="checkbox" name="sizes" value="<%= size %>" class="peer hidden" />
+            <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-[11px] font-black text-gray-400 border border-gray-100 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-lg peer-checked:shadow-blue-100 transition-all">
+              <%= size %>
+            </span>
+          </label>
+        <% }) %>
+      </div>
+    </div>
 
-        <!-- 🔥 UPDATE IMAGES -->
-        <div class="form-group">
-          <input type="file" name="images" accept="image/*" multiple />
-          <small style="color:gray">Leave empty to keep old images</small>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 block">Current Images</label>
+      <div id="editImagePreview" class="flex flex-wrap gap-3 p-4 bg-white rounded-2xl border-2 border-dashed border-gray-100 min-h-[100px] items-center">
         </div>
+    </div>
 
-        <!-- Sizes -->
-        <div class="category-box">
-          <div>Select Size ✔</div>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-blue-600 uppercase ml-2 block font-bold">Update Photos</label>
+      <input type="file" name="images" accept="image/*" multiple 
+        class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-white cursor-pointer hover:file:bg-blue-600 transition-all" />
+      <p class="text-[9px] text-gray-400 italic ml-2">Keep empty to retain old photos</p>
+    </div>
+  </div>
 
-          <label><input type="checkbox" name="sizes" value="6" /> 6</label>
-          <label><input type="checkbox" name="sizes" value="7" /> 7</label>
-          <label><input type="checkbox" name="sizes" value="8" /> 8</label>
-          <label><input type="checkbox" name="sizes" value="9" /> 9</label>
-          <label><input type="checkbox" name="sizes" value="10" /> 10</label>
-          <label><input type="checkbox" name="sizes" value="11" /> 11</label>
-        </div>
-
-        <div class="modal-btns">
-          <button type="button" class="btn-main btn-cancel" onclick="closeModal('editModal')">
-            Cancel
-          </button>
-          <button type="submit" class="btn-main btn-save">
-            Update Changes
-          </button>
-        </div>
+  <div class="p-6 border-t border-gray-50 flex gap-4 bg-white flex-shrink-0">
+    <button type="button" class="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-all" onclick="closeModal('editModal')">
+      Discard
+    </button>
+    <button type="submit" class="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 hover:bg-blue-600 hover:shadow-blue-200 transition-all active:scale-95">
+      Update Changes
+    </button>
+  </div>
+</div>
       </div>
     </div>
   </form>

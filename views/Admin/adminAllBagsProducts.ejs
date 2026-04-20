@@ -7,6 +7,39 @@
   <title>Manage Products | <%-admin.username%></title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="/css/admin-product.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+  }
+
+  /* Description Clamp (2 lines max) */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Modal Display Fix */
+  .modal-overlay {
+    transition: all 0.3s ease;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+</style>
+
 
 </head>
 
@@ -52,7 +85,7 @@
       </button>
     </header>
 
-    <div class="product-grid">
+    <!-- <div class="product-grid">
       <% products.forEach(product=> { %>
         <div class="product-card">
           <img src="<%= product.images[0] %>" class="product-img" />
@@ -94,7 +127,82 @@
           </div>
         </div>
         <% }) %>
+    </div> -->
+    <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-6 bg-gray-50/50">
+  <% products.forEach(product=> { %>
+    <div class="product-card group relative bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden flex flex-col">
+      
+      <div class="absolute top-5 left-5 right-5 z-10 flex justify-between items-center">
+        <span class="bg-black/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg">
+          <%= product.brand %>
+        </span>
+        <span class="<%= product.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' %> text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-sm">
+          <%= product.status === "active" ? "● Active" : "○ Hidden" %>
+        </span>
+      </div>
+
+      <div class="relative aspect-square overflow-hidden bg-gray-100">
+        <img src="<%= product.images[0] %>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        <div class="absolute bottom-4 left-4">
+          <span class="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-bold uppercase px-3 py-1 rounded-md">
+            <%= product.gender %>
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6 flex flex-col flex-grow">
+        <h3 class="text-xl font-black tracking-tighter text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+          <%= product.title %>
+        </h3>
+        <p class="text-gray-400 text-[11px] leading-relaxed line-clamp-2 mt-1 mb-4 italic">
+          <%= product.description %>
+        </p>
+
+        <div class="flex items-center gap-2 mb-4">
+          <% if (product.offerPercentage > 0) { %>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold text-red-400 line-through">₹<%= product.price %></span>
+              <span class="text-2xl font-black text-gray-900 leading-none">₹<%= product.offerPrice %></span>
+            </div>
+            <span class="bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-lg">
+              -<%= product.offerPercentage %>%
+            </span>
+          <% } else { %>
+            <span class="text-2xl font-black text-gray-900">₹<%= product.price %></span>
+          <% } %>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Sizes Available</p>
+          <div class="flex flex-wrap gap-1.5">
+            <% product.sizes.forEach(size => { %>
+              <span class="text-[10px] font-bold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-1 rounded-md italic">
+                <%= size %>
+              </span>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="mt-auto">
+          <div class="flex justify-between items-center mb-1.5 text-[10px] font-black uppercase">
+            <span class="text-gray-400">Inventory</span>
+            <span class="<%= product.totalStock < 5 ? 'text-red-500 animate-pulse' : 'text-gray-900' %>">
+              <%= product.totalStock %> Left
+            </span>
+          </div>
+          <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-gray-900 h-full transition-all duration-1000" style="width: <%= Math.min((product.totalStock / 20) * 100, 100) %>%"></div>
+          </div>
+        </div>
+
+        <button class="mt-6 w-full bg-gray-900 text-white py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 group-hover:bg-blue-600 group-hover:shadow-blue-200 transition-all active:scale-95" 
+                onclick='openEditModal(<%- JSON.stringify(product) %>)'>
+          Edit Product
+        </button>
+      </div>
     </div>
+  <% }) %>
+</div>
 
   </main>
 
@@ -103,57 +211,82 @@
   <form action="/admin-howmanybagsuploaded" method="POST" enctype="multipart/form-data">
     <div class="modal-overlay" id="addModal">
       <div class="modal-box">
-        <!-- <h2>Add New Bags</h2> -->
+       <div class="flex flex-col max-h-[90vh]">
+  
+  <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
+    <h2 class="text-xl font-black tracking-tighter text-gray-900 uppercase">
+      Add New <span class="text-blue-600">Bag</span>
+    </h2>
+    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Backpacks, Handbags & Travel Gear</p>
+  </div>
 
-        <div class="form-group">
-          <input type="text" name="title" placeholder="Bags Name" required />
-        </div>
+  <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-5" style="max-height: 60vh;">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest">Bags Name</label>
+        <input type="text" name="title" placeholder="Bags Name" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest">Price (₹)</label>
+        <input type="number" name="price" placeholder="₹ 0.00" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <input type="number" name="price" placeholder="Price (₹)" required />
-        </div>
+    <div class="form-group">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest">Description</label>
+      <textarea name="description" rows="3" placeholder="Mention material, compartments, strap type, etc." 
+        class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" required></textarea>
+    </div>
 
-        <div class="form-group">
-          <textarea name="description" rows="3" placeholder="Enter product description" style="width: 100%; border: 1px solid gray;" required></textarea>
-        </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest">Offer (%)</label>
+        <input type="number" name="offerPercentage" value="0"
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block tracking-widest font-bold">Total Stock</label>
+        <input type="number" name="totalStock" placeholder="Total Stock" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>Offer (%)</label>
-          <input type="number" name="offerPercentage" value="0" />
-        </div>
-
-        <div class="form-group">
-          <input type="number" name="totalStock" placeholder="Total Stock" required />
-        </div>
-
-        <div style="padding: 0.5rem;">
-        <label>Gender</label>
-        <select name="gender" required>
+    <div class="p-5 bg-gray-50 rounded-[2rem] border border-gray-100">
+      <div class="flex flex-col text-center">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-2 tracking-widest">Target Gender</label>
+        <select name="gender" class="bg-transparent border-none font-bold text-gray-900 text-xs text-center focus:ring-0 outline-none cursor-pointer" required>
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="unisex">Unisex</option>
         </select>
-        </div>
+      </div>
+    </div>
 
-        <!-- 🔥 Multiple Images -->
-        <div class="form-group">
-          <input type="file" name="images" accept="image/*" multiple required />
-          <small style="color:gray">
-            Max 4 images • Each max 2MB
-          </small>
-        </div>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-blue-600 uppercase ml-2 block font-bold tracking-widest">Product Images (Max 4)</label>
+      <div class="relative w-full">
+        <input type="file" name="images" accept="image/*" multiple 
+          class="w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-white cursor-pointer hover:file:bg-blue-600 transition-all" required />
+      </div>
+      <p class="text-[9px] text-gray-400 italic font-medium ml-2">Upload high-quality front and side views</p>
+    </div>
 
-        <!-- Hidden -->
-        <input type="hidden" name="category" value="bags" />
+    <input type="hidden" name="category" value="bags" />
 
-        <div class="modal-btns">
-          <button type="button" class="btn-main btn-cancel" onclick="closeModal('addModal')">
-            Cancel
-          </button>
-          <button type="submit" class="btn-main btn-save">
-            Add Product
-          </button>
-        </div>
+  </div>
+
+  <div class="p-6 border-t border-gray-50 flex gap-4 bg-white flex-shrink-0">
+    <button type="button" class="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-all" onclick="closeModal('addModal')">
+      Discard
+    </button>
+    <button type="submit" class="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 hover:bg-blue-600 hover:shadow-blue-200 transition-all active:scale-95">
+      Add Product
+    </button>
+  </div>
+</div>
       </div>
     </div>
   </form>
@@ -162,72 +295,92 @@
   <form action="/admin-editbagsproducts" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="productId" id="editProductId" />
 
-    <div class="modal-overlay" id="editModal" style="overflow-y: scroll;">
-      <div class="modal-box" style="overflow-y: scroll; position: relative; top: 3rem;">
-        <!-- <h2>Edit Product</h2> -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-box">
+        <div class="space-y-6 flex flex-col max-h-[85vh]">
+  
+  <div class="border-b border-gray-100 pb-4 flex-shrink-0">
+    <h2 class="text-xl font-black tracking-tighter text-gray-900 uppercase">
+      Edit <span class="text-blue-600">Bag Details</span>
+    </h2>
+  </div>
 
-        <div class="form-group">
-          <input type="text" name="title" id="editName" placeholder="Bags Name" required />
-        </div>
+  <div class="overflow-y-auto px-2 space-y-5 flex-grow custom-scrollbar" style="max-height: 60vh;">
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Bags Name</label>
+        <input type="text" name="title" id="editName" placeholder="Bags Name" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Price (₹)</label>
+        <input type="number" name="price" id="editPrice" placeholder="Price (₹)" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <input type="number" name="price" id="editPrice" placeholder="Price (₹)" required />
-        </div>
+    <div class="form-group">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Product Description</label>
+      <textarea name="description" id="editDescription" rows="3" placeholder="Description" 
+        class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" required></textarea>
+    </div>
 
-        <div class="form-group">
-          <textarea name="description" id="editDescription" rows="3" placeholder="Description" style="width: 100%; border: 1px solid gray;" required></textarea>
-        </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Offer (%)</label>
+        <input type="number" name="offerPercentage" id="editOffer" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+      <div class="form-group">
+        <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Total Stock</label>
+        <input type="number" name="totalStock" id="editStock" placeholder="Total Stock" 
+          class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" />
+      </div>
+    </div>
 
-        <div class="form-group">
-          <label>Offer (%)</label>
-          <input type="number" name="offerPercentage" id="editOffer" />
-        </div>
-
-        <div class="form-group">
-          <input type="number" name="totalStock" id="editStock" placeholder="Total Stock"/>
-        </div>
-
-        <div style="display: flex; justify-content: space-around; padding-bottom: 1rem;">
-
-          <div>
-        <label>Gender</label>
-        <select name="gender" id="editGender">
+    <div class="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-[1.5rem] border border-gray-100">
+      <div class="flex-1">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-1 block">Gender</label>
+        <select name="gender" id="editGender" class="w-full bg-transparent border-none font-bold text-gray-800 text-xs focus:ring-0 outline-none cursor-pointer">
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="unisex">Unisex</option>
         </select>
-          </div>
-
-
-        <div>
-        <label>Status</label>
-        <select name="status" id="editStatus">
+      </div>
+      <div class="w-[1px] h-8 bg-gray-200"></div>
+      <div class="flex-1">
+        <label class="text-[9px] font-black text-gray-400 uppercase mb-1 block">Status</label>
+        <select name="status" id="editStatus" class="w-full bg-transparent border-none font-bold text-gray-800 text-xs focus:ring-0 outline-none cursor-pointer">
           <option value="active">Show</option>
           <option value="inactive">Hide</option>
         </select>
-        </div>
-        </div>
+      </div>
+    </div>
 
-        <!-- 🔥 EXISTING IMAGES -->
-        <div class="form-group">
-          <label>Current Images</label>
-          <div id="editImagePreview" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+    <div class="space-y-3">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 block">Current Images</label>
+      <div id="editImagePreview" class="flex flex-wrap gap-2 p-3 bg-white rounded-2xl border-2 border-dashed border-gray-100 min-h-[80px] items-center">
         </div>
+    </div>
 
-        <!-- 🔥 UPDATE IMAGES -->
-        <div class="form-group">
-          <input type="file" name="images" accept="image/*" multiple />
-          <small style="color:gray">Leave empty to keep old images</small>
-        </div>
+    <div class="space-y-2">
+      <label class="text-[10px] font-black text-gray-400 uppercase ml-2 block text-blue-600 font-bold">Replace Images</label>
+      <input type="file" name="images" accept="image/*" multiple 
+        class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-white cursor-pointer" />
+      <p class="text-[9px] text-gray-400 italic ml-2">Keep empty to retain old photos</p>
+    </div>
+  </div>
 
-        <div class="modal-btns">
-          <button type="button" class="btn-main btn-cancel" onclick="closeModal('editModal')">
-            Cancel
-          </button>
-          <button type="submit" class="btn-main btn-save">
-            Update Changes
-          </button>
-        </div>
+  <div class="modal-btns flex gap-4 pt-4 border-t border-gray-50 flex-shrink-0">
+    <button type="button" class="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors" onclick="closeModal('editModal')">
+      Cancel
+    </button>
+    <button type="submit" class="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl hover:bg-blue-600 transition-all active:scale-95">
+      Update Changes
+    </button>
+  </div>
+</div>
       </div>
     </div>
   </form>

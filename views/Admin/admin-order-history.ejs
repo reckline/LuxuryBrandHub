@@ -7,9 +7,26 @@
 
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/admin-newoder.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              light: '#F3E8FF',
+              DEFAULT: '#C084FC',
+              dark: '#6B21A8',
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
 
-<body>
+<body class="bg-gray-50">
 
 <header class="mobile-header">
   <span style="font-weight:800;font-size:1.2rem">Rider Admin</span>
@@ -18,99 +35,299 @@
 
 <%- include('../partials/adminNavBar') %>
 
-<main class="main-content">
+<main class="main-content p-4 md:p-8">
+  <h1 class="text-2xl font-black text-gray-800">Order History</h1>
+  <p class="text-gray-500 mb-6 mt-4">All delivered & cancelled orders</p>
 
-  <h1>Order History</h1>
-  <p>All delivered & cancelled orders</p>
-
-  <div class="table-container">
-    <table>
-      <thead>
+  <div class="table-container bg-white rounded-3xl shadow-sm overflow-hidden" style="overflow-x: auto;">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-gray-50 border-b border-gray-100">
         <tr>
-          <th>ORDER ID</th>
-          <th>CUSTOMER</th>
-          <th>PRODUCTS</th>
-          <th>PRICE</th>
-          <th>STATUS</th>
-          <th>DATE</th>
-          <th>ACTION</th>
+          <div class="grid grid-cols-7 gap-4 flex items-center justify-center">
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Order ID</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Profile</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Customer</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Price</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Status</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Action</th>
+          <th class="p-4 text-[10px] font-black uppercase text-gray-400">User Bill</th>
+          </div>
         </tr>
       </thead>
 
       <tbody>
         <% if (orders.length === 0) { %>
           <tr>
-            <td colspan="7" style="text-align:center;">No order history found</td>
+            <td colspan="6" class="p-10 text-center text-gray-400 font-bold">No order history found</td>
           </tr>
         <% } %>
 
         <% orders.forEach(order => { %>
-          <tr>
-            <td>#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+          <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+            <td class="p-4 font-bold text-gray-400">#<%= order._id.toString().slice(-6).toUpperCase() %></td>
 
-            <!-- CUSTOMER -->
-            <td>
-              <div class="customer-info">
-                <div class="avatar">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-light text-brand-dark rounded-full flex items-center justify-center font-black">
                   <%= order.user.username.charAt(0).toUpperCase() %>
                 </div>
                 <div>
-                  <strong><%= order.user.username %></strong><br>
-                  <small><%= order.paymentMethod %></small>
+                  <p class="font-bold text-gray-800 leading-tight"><%= order.user.username %></p>
+                  <small class="text-brand-dark font-bold text-[10px] uppercase"><%= order.paymentMethod %></small>
                 </div>
               </div>
             </td>
 
-            <!-- PRODUCTS -->
-            <td>
-              <% order.items.forEach(i => { %>
-                <div style="margin-bottom:4px;">
-                  <b><%= i.product.title %></b>
-                  <% if(i.size){ %>
-                    (Size: <%= i.size %>)
-                  <% } %>
-                  × <%= i.qty %>
-                </div>
-              <% }) %>
-            </td>
+            <td class="p-4 font-black text-gray-700 uppercase text-xs"><%= order.name %></td>
+            <td class="p-4 font-black text-gray-900 italic">₹<%= order.totalAmount %></td>
 
-            <!-- PRICE -->
-            <td><b>₹<%= order.totalAmount %></b></td>
-
-            <!-- STATUS -->
-            <td>
+            <td class="p-4">
               <% if(order.orderStatus === "Delivered"){ %>
-                <span class="badge badge-delivered">Delivered</span>
+                <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Delivered</span>
               <% } else { %>
-                <span class="badge badge-cancelled">Cancelled</span>
+                <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Cancelled</span>
               <% } %>
             </td>
 
-            <!-- DATE -->
-            <td>
-              <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
-            </td>
-
-            <!-- ACTION -->
-            <td>
-              <a href="/admin-seeuseralldetails/<%= order.user._id %>">
-                <button class="btn-view" style="margin-top:6px;">
-                  View Profile
+            <td class="p-4">
+              <div class="flex flex-col gap-1">
+                <button 
+                  class="bg-brand-dark text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all"
+                  onclick='openOrderModal(<%- JSON.stringify(order) %>)'>
+                  View Oder
                 </button>
-              </a>
+                <a href="/admin-seeuseralldetails/<%= order.user._id %>" class="text-center text-[9px] font-bold text-red-600 hover:text-brand-dark uppercase">
+                  User Profile
+                </a>
+              </div>
             </td>
-
+            <td>
+              <div>
+                <button 
+                class="bg-brand-dark text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all" 
+                onclick='openUserBillModal(<%- JSON.stringify(order) %>)'>
+                  View User Bill
+                </button>
+              </div>
+            </td>
           </tr>
         <% }) %>
       </tbody>
     </table>
   </div>
-
 </main>
+<!-- ================================== View Order Modal ================================== -->
+<div id="orderModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
+        
+        <div class="bg-brand-dark p-6 text-white flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-black uppercase tracking-tight leading-none">Order Receipt</h2>
+              <p id="modalOrderId" class="text-[10px] font-bold text-white/60 mt-1"></p>
+            </div>
+            <button onclick="closeOrderModal()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all text-xl">✖</button>
+        </div>
 
+        <div class="p-8 max-h-[75vh] overflow-y-auto">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Items Ordered</p>
+            <div id="modalItems" class="space-y-3 mb-8">
+                </div>
+
+            <div class="grid grid-cols-2 gap-8 border-t border-gray-100 pt-6">
+                <div>
+                    <p class="text-[10px] font-black text-brand-dark uppercase mb-3">Shipping To</p>
+                    <p id="modalName" class="font-black text-gray-900 text-sm italic uppercase"></p>
+                    <p id="modalAddress" class="text-gray-500 text-[11px] mt-1 leading-relaxed"></p>
+                    <p id="modalMobile" class="text-gray-800 font-bold text-xs mt-3 bg-gray-100 inline-block px-2 py-1 rounded-md"></p>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100">
+                    <p class="text-[10px] font-black text-brand-dark uppercase mb-3">Billing Summary</p>
+                    <div class="space-y-2">
+                      <div class="flex justify-between text-xs font-bold text-gray-500">
+                          <span>Subtotal</span> <span id="modalTotal"></span>
+                      </div>
+                      <div class="flex justify-between text-xs font-bold text-green-600">
+                          <span>Paid</span> <span id="modalPaid"></span>
+                      </div>
+                      <div class="flex justify-between text-sm font-black text-red-600 pt-2 border-t border-dashed border-gray-300">
+                          <span>Balance</span> <span id="modalDue"></span>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex items-center justify-between">
+              <div class="text-[10px] text-gray-400 font-bold">
+                <p>Status: <span id="modalOrderStatus" class="text-brand-dark"></span></p>
+                <p id="modalDate" class="mt-0.5"></p>
+              </div>
+              <div class="text-right">
+                <p class="text-[9px] text-gray-400 uppercase font-black italic">Ref ID</p>
+                <p id="modalPayId" class="text-[10px] font-bold text-gray-800 truncate w-32"></p>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ================================== View Bill Modal ================================== -->
+ <div id="userBillModal" class="fixed inset-0 bg-black/70 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-b-none rounded-t-[2rem] md:rounded-[2rem] overflow-hidden shadow-2xl relative border-t-8 border-brand-dark">
+        
+        <div id="billPrintArea" class="p-8 space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-black italic tracking-tighter text-gray-900 uppercase">luxury brand hub</h2>
+                <p class="text-[9px] font-bold text-gray-400 tracking-[0.2em] uppercase">Official Order Receipt</p>
+            </div>
+
+            <div class="flex justify-between items-end border-b border-dashed border-gray-200 pb-4">
+                <div>
+                    <p class="text-[10px] font-black text-brand-dark uppercase">Bill To:</p>
+                    <p id="billCustName" class="text-sm font-black text-gray-800 uppercase italic"></p>
+                    <p id="billCustMobile" class="text-[11px] font-bold text-gray-500"></p>
+                </div>
+                <div class="text-right">
+                    <p id="billDate" class="text-[10px] font-bold text-gray-400"></p>
+                    <p id="billId" class="text-[10px] font-black text-gray-800 uppercase"></p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                    <span>Product Details</span>
+                    <span>Total</span>
+                </div>
+                <div id="billItemsList" class="space-y-3">
+                    </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-2xl space-y-2 border border-gray-100">
+                <div class="flex justify-between text-xs font-bold text-gray-600">
+                    <span>Total Bill Amount</span>
+                    <span id="billGrandTotal"></span>
+                </div>
+                <div class="flex justify-between text-xs font-bold text-green-600">
+                    <span>Amount Paid (Advance)</span>
+                    <span id="billPaidAmt"></span>
+                </div>
+                <div class="flex justify-between text-sm font-black text-red-600 border-t border-dashed border-gray-300 pt-2 mt-2">
+                    <span>Balance to Pay (COD)</span>
+                    <span id="billDueAmt"></span>
+                </div>
+            </div>
+
+            <div class="text-center space-y-1">
+                <p class="text-[10px] font-bold text-gray-400 italic">Thank you for shopping with us!</p>
+                <div id="billPayMethod" class="inline-block px-3 py-1 bg-brand-light text-brand-dark rounded-full text-[9px] font-black uppercase"></div>
+            </div>
+        </div>
+
+        <div class="bg-gray-100 p-4 flex gap-3">
+            <button onclick="window.print()" class="flex-1 bg-gray-800 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                <i class="fa-solid fa-print mr-2"></i> Print
+            </button>
+            <button onclick="closeBillModal()" class="flex-1 bg-white border border-gray-300 text-gray-600 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 <script>
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("active");
+}
+
+function openOrderModal(order) {
+    // Basic Details
+    document.getElementById('modalOrderId').innerText = "ID: #" + order._id.toString().toUpperCase();
+    document.getElementById('modalOrderStatus').innerText = order.orderStatus.toUpperCase();
+    document.getElementById('modalDate').innerText = "Date: " + new Date(order.createdAt).toLocaleDateString('en-IN');
+    document.getElementById('modalName').innerText = order.name;
+    document.getElementById('modalAddress').innerText = `${order.address}, ${order.pincode}, ${order.state}`;
+    document.getElementById('modalMobile').innerText = "📞 " + order.mobile;
+    document.getElementById('modalPayId').innerText = order.paymentId || "N/A";
+
+    // Billing
+    document.getElementById('modalTotal').innerText = "₹" + order.totalAmount;
+    document.getElementById('modalPaid').innerText = "₹" + (order.advancePaid || 0);
+    document.getElementById('modalDue').innerText = "₹" + (order.amountDue || 0);
+
+    // Items List
+    const itemsContainer = document.getElementById('modalItems');
+    itemsContainer.innerHTML = '';
+
+    order.items.forEach(item => {
+        const itemHtml = `
+            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-brand-light rounded-xl flex flex-col items-center justify-center leading-none">
+                        <span class="text-[10px] font-black text-brand-dark uppercase">Size</span>
+                        <span class="text-lg font-black text-brand-dark italic">${item.size || '-'}</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-black text-gray-800 uppercase tracking-tight">${item.product.title}</p>
+                        <p class="text-[10px] text-gray-400 font-bold italic">Qty: ${item.qty} × ₹${item.price}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-gray-900 italic">₹${item.total}</p>
+                </div>
+            </div>
+        `;
+        itemsContainer.innerHTML += itemHtml;
+    });
+
+    document.getElementById('orderModal').classList.remove('hidden');
+}
+
+function closeOrderModal() {
+    document.getElementById('orderModal').classList.add('hidden');
+}
+
+// Esc Key to close
+window.onkeydown = function(e) {
+  if (e.key === "Escape") closeOrderModal();
+}
+</script>
+
+
+<script>
+  function openUserBillModal(order) {
+    // 1. Customer & Order Info
+    document.getElementById('billCustName').innerText = order.name;
+    document.getElementById('billCustMobile').innerText = "+91 " + order.mobile;
+    document.getElementById('billDate').innerText = new Date(order.createdAt).toLocaleDateString('en-IN');
+    document.getElementById('billId').innerText = "INV-" + order._id.toString().slice(-6).toUpperCase();
+    document.getElementById('billPayMethod').innerText = "Payment: " + order.paymentMethod;
+
+    // 2. Billing Figures
+    document.getElementById('billGrandTotal').innerText = "₹" + order.totalAmount;
+    document.getElementById('billPaidAmt').innerText = "- ₹" + (order.advancePaid || 0);
+    document.getElementById('billDueAmt').innerText = "₹" + (order.amountDue || 0);
+
+    // 3. Dynamic Items List
+    const listContainer = document.getElementById('billItemsList');
+    listContainer.innerHTML = ''; // Clear previous
+
+    order.items.forEach(item => {
+        const itemRow = `
+            <div class="flex justify-between items-start border-b border-gray-50 pb-2">
+                <div>
+                    <p class="text-xs font-black text-gray-800 uppercase tracking-tighter">${item.product.title}</p>
+                    <p class="text-[9px] text-gray-400 font-bold">SIZE: ${item.size || 'N/A'} | QTY: ${item.qty} x ₹${item.price}</p>
+                </div>
+                <p class="text-xs font-black text-gray-900 italic">₹${item.total}</p>
+            </div>
+        `;
+        listContainer.innerHTML += itemRow;
+    });
+
+    // 4. Show Modal
+    document.getElementById('userBillModal').classList.remove('hidden');
+}
+
+function closeBillModal() {
+    document.getElementById('userBillModal').classList.add('hidden');
 }
 </script>
 

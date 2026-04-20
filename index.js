@@ -1,3 +1,4 @@
+
 require("dotenv").config();
 console.log("DEBUG ENV:", process.env.MONGO_URI);
 
@@ -6,7 +7,7 @@ const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-require("dotenv").config(); // <-- load .env variables
+
 
 // Import routes
 const rootDir = require("./utils/pathUtils");
@@ -15,6 +16,7 @@ const adminRouter = require("./routes/adminRouter");
 const paymentRouter = require("./routes/paymentRoutes");
 const loginSignupRouter = require("./routes/loginSignupRouter");
 const User = require("./model/userSchema"); // 🔥 MUST
+
 
 // ---------------- EXPRESS APP ----------------
 const app = express();
@@ -38,6 +40,8 @@ app.use(
 );
 
 // ---------------- PARSERS ----------------
+app.use("/payment/razorpay-webhook", express.raw({ type: "*/*" }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -113,6 +117,8 @@ app.use(express.static(path.join(rootDir, "public")));
 app.use(userRouter);
 app.use(adminRouter);
 app.use(loginSignupRouter);
+app.use("/", paymentRouter);
+// app.use("/payment", paymentRouter);
 
 
 // ---------------- ERROR HANDLING ---------------- <--- isko bhi krna h important

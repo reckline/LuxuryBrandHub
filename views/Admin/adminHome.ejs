@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel | Rider Shoe</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <link rel="stylesheet" href="/css/adminDashbord.css" />
 </head>
@@ -16,7 +18,7 @@
   <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
   <header class="mobile-nav">
-    <div class="logo"><%- admin.username %></div>
+    <div class="logo" style="font-weight: 800; font-size: 1.2rem"><%- admin.username %></div>
     <i class="fa-solid fa-bars" style="font-size: 1.5rem; cursor: pointer" onclick="toggleSidebar()"></i>
   </header>
 
@@ -25,7 +27,7 @@
     <!--  ================== Contant Area Start ============ -->
 
     <main class="main-content">
-      <div style="
+      <!-- <div style="
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -35,11 +37,11 @@
           <h1>Dashboard</h1>
           <p style="color: #64748b">Managing Rider Shoe Store</p>
         </div>
-      </div>
+      </div> -->
 
       <!--  ================== Sales ============ -->
 
-      <div class="stats-grid">
+      <!-- <div class="stats-grid">
         <a href="/todaysale" style="text-decoration: none">
           <div class="stat-card">
             <h3>Today's Sales</h3>
@@ -57,9 +59,9 @@
             <h3>Total Sales</h3>
             <div class="value">₹1,24,500</div>
           </div>
-        </a>
+        </a> -->
         <!--  ================== Orders ============ -->
-        <a href="/cancel-orders" style="text-decoration: none">
+        <!-- <a href="/cancel-orders" style="text-decoration: none">
           <div class="stat-card" style="background-color: #fca5a5">
             <h3>Total Cancel Orders</h3>
             <div class="value">42</div>
@@ -91,51 +93,100 @@
             <h3>Yesterday Orders</h3>
             <div class="value">158</div>
           </div>
-        </a>
+        </a> -->
         <!--  ================== Total Orders ============ -->
-        <a href="/totalorders" style="text-decoration: none">
+        <!-- <a href="/totalorders" style="text-decoration: none">
           <div class="stat-card">
             <h3>Total Orders</h3>
             <div class="value">158</div>
           </div>
-        </a>
+        </a> -->
         <!--  ================== Products ============ -->
 
-        <a href="/totalproducts" style="text-decoration: none">
+        <!-- <a href="/totalproducts" style="text-decoration: none">
           <div class="stat-card" style="background-color: #096d9f7b;">
             <h3>Your Total Products</h3>
             <div class="value">1158</div>
           </div>
         </a>
-      </div>
-
-      <!-- <div class="table-container">
-        <h2 style="margin-bottom: 1rem; font-size: 1.2rem">Recent Activity</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>#RS-101</td>
-              <td>Aman S.</td>
-              <td>₹2,499</td>
-              <td><span class="status status-paid">Completed</span></td>
-            </tr>
-            <tr>
-              <td>#RS-102</td>
-              <td>Rahul V.</td>
-              <td>₹3,199</td>
-              <td><span class="status status-paid">Completed</span></td>
-            </tr>
-          </tbody>
-        </table>
       </div> -->
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+
+            <a href="/admin-userlist" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-500 transition-all text-center">
+                <div class="bg-indigo-50 text-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-users text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">My Users</h3>
+            </a>
+
+            <a href="/admin-howmanyshoesuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-orange-500 transition-all text-center">
+                <div class="bg-orange-50 text-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-shoe-prints text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Shoes</h3>
+            </a>
+
+            <a href="/admin-howmanyglassesuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-cyan-500 transition-all text-center">
+                <div class="bg-cyan-50 text-cyan-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-glasses text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Glasses</h3>
+            </a>
+
+            <a href="/admin-howmanywatchesuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-emerald-500 transition-all text-center">
+                <div class="bg-emerald-50 text-emerald-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-stopwatch text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Watches</h3>
+            </a>
+
+            <a href="/admin-howmanyclothesuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-violet-500 transition-all text-center">
+                <div class="bg-violet-50 text-violet-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-shirt text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Clothes</h3>
+            </a>
+
+            <a href="/admin-howmanybagsuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-pink-500 transition-all text-center">
+                <div class="bg-pink-50 text-pink-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-bag-shopping text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Bags</h3>
+            </a>
+
+            <a href="/admin-howmanyslidersuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-yellow-500 transition-all text-center">
+                <div class="bg-yellow-50 text-yellow-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-shoe-prints text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Sliders</h3>
+            </a>
+
+            <a href="/admin-howmanycrocsuploaded" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-green-500 transition-all text-center">
+                <div class="bg-green-50 text-green-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-shoe-prints text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Add Crocs</h3>
+            </a>
+
+            <a href="/admin-newoder" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-red-500 transition-all text-center relative overflow-hidden">
+                <div class="bg-red-50 text-red-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">New Orders</h3>
+                <span class="absolute top-4 right-4 bg-red-500 w-3 h-3 rounded-full"></span>
+            </a>
+
+            <a href="/admin-order-history" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-slate-800 transition-all text-center">
+                <div class="bg-slate-100 text-slate-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                </div>
+                <h3 class="font-bold text-slate-700">Order History</h3>
+            </a>
+
+        </div>
+
     </main>
     <script src="/js/adminDashbord.js"></script>
 </body>

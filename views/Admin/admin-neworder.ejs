@@ -27,9 +27,12 @@
           <thead>
             <tr>
               <th>ORDER ID</th>
+              <th>PROFILE</th>
               <th>CUSTOMER</th>
               <th>PRODUCTS</th>
+              <th>ADVANCE</th>
               <th>PRICE</th>
+              <th>DUE</th>
               <th>STATUS</th>
               <th>DATE</th>
               <th>ACTION</th>
@@ -64,6 +67,8 @@
                       </div>
                     </td>
 
+                     <td><b><%= order.name %></b></td>
+
                     <td>
                       <% order.items.forEach(i=> { %>
                         <div style="margin-bottom:6px">
@@ -79,7 +84,11 @@
 
                     </td>
 
+                    <td><b>₹<%= order.advancePaid %></b></td>
+
                     <td><b>₹<%= order.totalAmount %></b></td>
+
+                    <td><b>₹<%= order.amountDue %></b></td>
 
                     <td>
                       <span class="badge badge-pending">

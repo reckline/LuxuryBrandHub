@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rider Shoes</title>
+  <title>Rider Shoes | <%= product.title %></title>
 
   <link rel="stylesheet" href="/css/index.css">
   <link rel="stylesheet" href="/css/slider.css">
@@ -16,11 +16,8 @@
   <link rel="stylesheet" href="/css/sopping.css">
 
   <script src="https://cdn.tailwindcss.com"></script>
-
-
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 
   <script>
     tailwind.config = {
@@ -28,9 +25,9 @@
         extend: {
           colors: {
             brand: {
-              light: '#F3E8FF', /* Very light purple */
-              DEFAULT: '#C084FC', /* Medium Purple */
-              dark: '#6B21A8', /* Deep Purple for text */
+              light: '#F3E8FF',
+              DEFAULT: '#C084FC',
+              dark: '#6B21A8',
               accent: '#A855F7'
             }
           }
@@ -38,183 +35,360 @@
       }
     }
   </script>
-
 </head>
 
-<!-- ========================== Header ============================================-->
-
 <body class="text-gray-800 font-sans">
+  <!-- <div id="toast-container" class="fixed top-5 right-5 z-[9999] space-y-3"></div> -->
 
   <%- include('../partials/userHeader') %>
-    <div class="container">
 
-      <!-- 🖼️ PRODUCT IMAGE -->
-      <div class="product-gallery">
-
-        <% const isInWishlist=wishlistIds.includes(product._id.toString()); %>
-
-          <button class="wishlist-btn <%= isInWishlist ? 'active' : '' %>"
-            onclick="toggleFav(this, '<%= product._id %>')">
-            <i class="<%= isInWishlist ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
-          </button>
-
-          <img src="<%= product.images[0] %>" class="main-img" alt="<%= product.title %>" />
+  <div class="container mx-auto px-4 py-8 flex justify-center" style="position: relative; top: -2.5rem;">
+    <div class=" gap-8 w-full">
+      
+      <div class="product-gallery relative bg-white rounded-3xl p-4 shadow-sm">
+        <% const isInWishlist = wishlistIds.includes(product._id.toString()); %>
+        <button class="wishlist-btn absolute top-6 right-6 z-10 <%= isInWishlist ? 'active' : '' %>"
+          onclick="toggleFav(this, '<%= product._id %>')">
+          <i class="<%= isInWishlist ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %> text-2xl"></i>
+        </button>
+        <img src="<%= product.images[0] %>" class="main-img w-full h-auto object-contain rounded-2xl" alt="<%= product.title %>" />
       </div>
 
-      <!-- 🧾 PRODUCT INFO -->
-      <main class="glass-panel">
-
-        <span class="brand-tag">
+      <main class="glass-panel p-8 bg-white rounded-3xl border border-gray-100 shadow-sm">
+        <span class="brand-tag bg-brand-light text-brand-dark px-3 py-1 rounded-full text-xs font-bold uppercase">
           <%= product.brand || "Premium Quality" %>
         </span>
 
-        <h1>
-          <%= product.title %>
-        </h1>
+        <h1 class="text-3xl font-black mt-4 uppercase"><%= product.title %></h1>
 
-        <!-- 💰 PRICE -->
-        <div class="price">
-          ₹<%= product.offerPrice %>
-
-            <% if (product.offerPercentage> 0) { %>
-              <span class="mrp">₹<%= product.price %></span>
-              <span class="text-green-600 font-bold ml-2">
-                (<%= product.offerPercentage %>% OFF)
-              </span>
-              <% } %>
+        <div class="price mt-2 flex items-center gap-3">
+          <span class="text-2xl font-black text-gray-900 italic">₹<%= product.offerPrice %></span>
+          <% if (product.offerPercentage > 0) { %>
+            <span class="mrp text-gray-400 line-through">₹<%= product.price %></span>
+            <span class="text-green-600 font-bold text-sm">(<%= product.offerPercentage %>% OFF)</span>
+          <% } %>
         </div>
 
-        <!-- 📄 DESCRIPTION -->
-        <p class="description">
-          <%= product.description || "No description available." %>
-        </p>
+        <p class="description mt-6 text-gray-500 text-sm leading-relaxed"><%= product.description %></p>
 
-        <!-- 👟 SIZE -->
-<% if (product.sizes && product.sizes.length > 0) { %>
-  <label class="selector-label">
-    Select Size <%= product.category === "shoes" ? "(UK)" : "" %>
-  </label>
+        <% if (product.sizes && product.sizes.length > 0) { %>
+          <label class="block text-xs font-black text-gray-400 uppercase mt-8 mb-3">Select Size (UK)</label>
+          <div class="size-grid flex flex-wrap gap-2">
+            <% product.sizes.forEach(size => { %>
+              <button type="button" class="size-btn px-4 py-2 border-2 border-gray-100 rounded-xl font-bold hover:border-brand transition-all" onclick="selectSize('<%= size %>', this)">
+                <%= size %>
+              </button>
+            <% }) %>
+          </div>
+          <p id="sizeError" class="text-red-600 text-[10px] mt-2 hidden uppercase font-bold">* Please select a size</p>
+        <% } %>
 
-  <div class="size-grid">
-    <% product.sizes.forEach(size => { %>
-      <button type="button" class="size-btn" onclick="selectSize('<%= size %>', this)">
-        <%= size %>
-      </button>
-    <% }) %>
-  </div>
+        <label class="block text-xs font-black text-gray-400 uppercase mt-8 mb-3">Quantity</label>
+        <div class="qty-input inline-flex items-center bg-gray-50 rounded-xl p-1">
+          <button class="w-10 h-10 flex items-center justify-center hover:bg-white rounded-lg" onclick="changeQty(-1)"><i class="fa-solid fa-minus"></i></button>
+          <span id="qty-val" class="px-6 font-bold text-gray-900">1</span>
+          <button class="w-10 h-10 flex items-center justify-center hover:bg-white rounded-lg" onclick="changeQty(1)"><i class="fa-solid fa-plus"></i></button>
+        </div>
 
-  <p id="sizeError" class="text-red-600 text-sm mt-2 hidden">
-    Please select a size
-  </p>
-<% } %>
-
-
-<!-- QUANTITY -->
-<label class="selector-label">Quantity</label>
-<div class="qty-input">
-  <button class="qty-btn" onclick="changeQty(-1)">
-    <i class="fa-solid fa-minus"></i>
-  </button>
-  <span id="qty-val" class="font-bold">1</span>
-  <button class="qty-btn" onclick="changeQty(1)">
-    <i class="fa-solid fa-plus"></i>
-  </button>
-</div>
-
-<!-- ADD TO CART -->
-<div class="action-btns">
-<button class="btn btn-cart"
-        data-incart="<%= isInCart ? 'true' : 'false' %>"
-        onclick="toggleCart(this, '<%= product._id %>')">
-  <i class="fa-solid fa-cart-plus"></i>
-  <span><%= isInCart ? "✔ Added" : "Add to Cart" %></span>
-</button>
-  <!-- BUY NOW -->
-
-  <button id="buyNowBtn" class="btn btn-buy" onclick="openCheckout()">
-    Buy Now
-  </button>
-</div>
-
-
-            <!-- 🚚 INFO -->
-            <div class="mt-8 grid grid-cols-2 gap-4 border-t pt-6 text-sm">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-truck-fast"></i> Free Fast Delivery
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-box"></i> Stock: <%= product.totalStock %>
-              </div>
-            </div>
-
+        <div class="action-btns mt-10 flex gap-4">
+          <!-- <button class="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest" onclick="toggleCart(this, '<%= product._id %>')">
+            <i class="fa-solid fa-cart-plus mr-2"></i> Add to Cart
+          </button> -->
+          <button id="buyNowBtn" class="flex-1 bg-brand-dark text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-xl" onclick="openCheckout()">
+            Buy Now
+          </button>
+        </div>
       </main>
     </div>
-    <!-- 🛒 Buy Now Modal -->
-    <div id="checkoutModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+  </div>
+<!-- =================================================================== -->
+  <div id="checkoutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <form id="checkoutForm" class="bg-white w-full max-w-lg rounded-3xl p-8 space-y-4 shadow-2xl relative">
+      <button type="button" onclick="closeCheckout()" class="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-all text-xl">✖</button>
 
-      <form action="/buy-now" method="POST"
-        class="bg-white w-[90%] max-w-lg rounded-2xl p-6 space-y-4 shadow-xl relative">
+      <h2 class="text-2xl font-black text-brand-dark uppercase">Delivery Details</h2>
 
-        <button type="button" onclick="closeCheckout()" class="absolute top-3 right-3 text-xl">✖</button>
+      <input type="hidden" name="productId" value="<%= product._id %>">
+      <input type="hidden" name="qty" id="buyQty" value="1">
+      <input type="hidden" name="size" id="selectedSize" value="">
+      <input type="hidden" name="price" value="<%= product.offerPrice %>">
 
-        <h2 class="text-xl font-bold text-brand-dark">Delivery Details</h2>
-
-        <input type="hidden" name="productId" value="<%= product._id %>">
-        <input type="hidden" name="qty" id="buyQty" value="1">
-        <input type="hidden" name="size" id="selectedSize">
-
-
-        <div>
-          <label class="block text-sm font-semibold">Full Name</label>
-          <input name="name" required class="w-full border p-2 rounded">
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold">Mobile Number</label>
-          <input name="mobile" required pattern="[0-9]{10}" class="w-full border p-2 rounded">
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold">Address</label>
-          <textarea name="address" required class="w-full border p-2 rounded"></textarea>
-        </div>
-
+      <div class="space-y-3">
+        <input name="name" id="custName" required placeholder="Full Name" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-brand outline-none">
+        <input name="mobile" id="custMobile" required pattern="[0-9]{10}" placeholder="Mobile Number" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-brand outline-none">
+        <textarea name="address" id="custAddress" required placeholder="Complete Address" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-brand outline-none h-20"></textarea>
+        
         <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-semibold">Pincode</label>
-            <input name="pincode" required class="w-full border p-2 rounded">
-          </div>
-          <div>
-            <label class="block text-sm font-semibold">State</label>
-            <input name="state" required class="w-full border p-2 rounded">
-          </div>
+          <input name="pincode" id="custPincode" required placeholder="Pincode" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-brand outline-none">
+          <input name="state" id="custState" required placeholder="State" class="w-full border p-3 rounded-xl focus:ring-2 focus:ring-brand outline-none">
         </div>
 
-        <div>
-          <label class="block text-sm font-semibold">Payment Method</label>
-
-          <select name="paymentMethod" required class="w-full border p-2 rounded">
-            <option value="COD">Cash on Delivery</option>
-            <option value="ONLINE">UPI / Card</option>
-          </select>
+        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+            <label class="block text-[10px] font-bold text-blue-600 uppercase mb-2">Payment Method</label>
+            <select id="paymentMethod" name="paymentMethod" class="w-full bg-transparent font-bold outline-none">
+              <option value="COD">COD (Rs. 50 Advance Required)</option>
+              <option value="ONLINE">Full Online Payment</option>
+            </select>
         </div>
+      </div>
 
+      <button type="submit" class="w-full bg-brand-dark text-white py-4 rounded-xl font-black uppercase text-sm tracking-widest mt-4">
+        Pay & Place Order
+      </button>
+    </form>
+  </div>
 
-        <button class="w-full bg-brand-dark text-white py-3 rounded-xl font-bold">
-          Place Order
-        </button>
-
-      </form>
-    </div>
-<script>
+  <script>
   window.PRODUCT_CATEGORY = "<%= product.category %>";
 </script>
 
-<script src="/js/heart.js"></script>
-<script src="/js/buynow.js"></script>
-<script src="/js/cart.js"></script>
 
+<script>
+// Quantity aur Size Logic
+
+let selectedSizeValue = "";
+
+function selectSize(size, btn) {
+
+  selectedSizeValue = size;
+
+  document.getElementById('selectedSize').value = size;
+
+  document.getElementById('sizeError').classList.add('hidden');
+
+  document.querySelectorAll('.size-btn')
+  .forEach(b => b.classList.remove('border-brand','bg-brand','text-white'));
+
+  btn.classList.add('border-brand','bg-brand','text-white');
+
+}
+
+
+// =======================
+// Quantity Change
+// =======================
+
+function changeQty(amt) {
+
+  const qtyVal = document.getElementById('qty-val');
+
+  let current = parseInt(qtyVal.innerText);
+
+  current += amt;
+
+  if (current < 1) current = 1;
+
+  if (current > <%= product.totalStock %>) current = <%= product.totalStock %>;
+
+  qtyVal.innerText = current;
+
+  document.getElementById('buyQty').value = current;
+
+}
+
+
+// =======================
+// Open Checkout
+// =======================
+
+function openCheckout() {
+
+  const needsSize = <%= (product.sizes && product.sizes.length > 0) ? 'true' : 'false' %>;
+
+  if (needsSize && !selectedSizeValue) {
+
+    document.getElementById('sizeError').classList.remove('hidden');
+
+    return;
+
+  }
+
+  document.getElementById('checkoutModal').classList.remove('hidden');
+
+}
+
+function closeCheckout() {
+
+  document.getElementById('checkoutModal').classList.add('hidden');
+
+}
+
+
+
+// =======================
+// Razorpay Checkout
+// =======================
+
+document.getElementById("checkoutForm").addEventListener("submit", async function(e) {
+
+  e.preventDefault();
+
+  const paymentMethod = document.getElementById("paymentMethod").value;
+
+  const productId = document.querySelector("input[name='productId']").value;
+
+  const qty = document.getElementById("buyQty").value;
+
+  try {
+
+    const res = await fetch("/create-order", {
+
+      method: "POST",
+
+      headers: { "Content-Type": "application/json" },
+
+      body: JSON.stringify({
+        productId: productId,
+        qty: qty,
+        paymentMethod: paymentMethod
+      })
+
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+
+      alert(data.message);
+
+      return;
+
+    }
+
+    const order = data.order;
+
+    const options = {
+
+      key: data.key,
+
+      amount: order.amount,
+
+      currency: "INR",
+
+      name: "Rider Shoe Point",
+
+      description:
+        paymentMethod === "COD"
+          ? "COD Advance Booking Fee"
+          : "Full Order Payment",
+
+      order_id: order.id,
+
+      handler: function(response) {
+
+        verifyAndSave(response, paymentMethod);
+
+      },
+
+      prefill: {
+
+        name: document.getElementById('custName').value,
+
+        contact: document.getElementById('custMobile').value
+
+      },
+
+      theme: { color: "#6B21A8" }
+
+    };
+
+    const rzp = new Razorpay(options);
+
+    rzp.open();
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+
+    alert("Payment Error. Please try again.");
+
+  }
+
+});
+
+
+
+// =======================
+// Verify Payment
+// =======================
+
+async function verifyAndSave(rzpResponse, method) {
+
+  const formData = {
+
+    razorpay_payment_id: rzpResponse.razorpay_payment_id,
+
+    razorpay_order_id: rzpResponse.razorpay_order_id,
+
+    razorpay_signature: rzpResponse.razorpay_signature,
+
+    productId: document.querySelector("input[name='productId']").value,
+
+    qty: document.getElementById("buyQty").value,
+
+    size: document.getElementById("selectedSize").value,
+
+    name: document.getElementById('custName').value,
+
+    mobile: document.getElementById('custMobile').value,
+
+    address: document.getElementById('custAddress').value,
+
+    pincode: document.getElementById('custPincode').value,
+
+    state: document.getElementById('custState').value,
+
+    paymentMethod: method
+
+  };
+
+  try {
+
+    const res = await fetch("/verify-payment", {
+
+      method: "POST",
+
+      headers: { "Content-Type": "application/json" },
+
+      body: JSON.stringify(formData)
+
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+
+      alert(
+        method === "COD"
+          ? "₹50 Received! Your COD order is placed."
+          : "Full Payment Received! Order placed."
+      );
+
+      window.location.href = "/order-success/" + data.orderId;
+
+    } else {
+
+      alert("Payment verification failed");
+
+    }
+
+  }
+
+  catch (err) {
+
+    console.error(err);
+
+    alert("Server error while verifying payment");
+
+  }
+
+}
+
+</script>
+
+  <script src="/js/heart.js"></script>
+  <script src="/js/cart.js"></script>
 </body>
-
 </html>

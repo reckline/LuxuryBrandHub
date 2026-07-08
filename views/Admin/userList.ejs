@@ -1,119 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Users | Rider Admin</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="css/adminuser-list.css">
-</head>
-
-<body>
-  <header class="mobile-header">
-    <span style="font-weight: 800"><%- admin.username %></span>
-    <i class="fa-solid fa-bars" onclick="toggleSidebar()"></i>
-  </header>
-<%- include('../partials/adminNavBar') %>
+<%- include('../partials/adminTop') %>
+<%- include('../partials/adminNavBar') %> 
 
   <main class="main-content">
-    <header style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        ">
-      <div>
-        <h1>User Management</h1>
-        <p style="color: #64748b">
-          Manage customers and administrative access
-        </p>
-      </div>
-    </header>
+  <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
+      <p class="text-sm text-gray-500">Manage customers and administrative access</p>
+    </div>
+  </div>
 
-    <div class="table-container">
-      <table>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
         <thead>
-          <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>Joined Date</th>
-            <th>Total Spend</th>
-            <th>Status</th>
-            <th>Action</th>
+          <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider font-semibold">
+            <th class="px-6 py-4">User</th>
+            <th class="px-6 py-4">Role</th>
+            <th class="px-6 py-4">Joined Date</th>
+            <th class="px-6 py-4">Total Spend</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Action</th>
           </tr>
         </thead>
 
-        <tbody id="userList">
+        <tbody class="divide-y divide-gray-100">
           <% if (users.length===0) { %>
             <tr>
-              <td colspan="6" style="text-align:center;">No users found</td>
+              <td colspan="6" class="px-6 py-10 text-center text-gray-500">No users found</td>
             </tr>
-            <% } %>
-
-              <% users.forEach(user=> { %>
-                <tr>
-                  <!-- USER INFO -->
-                  <td>
-                    <div class="user-cell">
-                      <div class="user-avatar" style="background:#fee2e2">
-                        <%= user.username.substring(0,2).toUpperCase() %>
-                      </div>
-                      <div class="user-info">
-                        <span class="name">
-                          <%= user.username %>
-                        </span>
-                        <span class="email">
-                          <%= user.emailAddress %>
-                        </span>
-                      </div>
+          <% } else { %>
+            <% users.forEach(user=> { %>
+              <tr class="hover:bg-gray-50/50 transition-colors">
+                
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm">
+                      <%= user.username.substring(0,2).toUpperCase() %>
                     </div>
-                  </td>
+                    <div class="flex flex-col">
+                      <span class="text-sm font-semibold text-gray-900"><%= user.username %></span>
+                      <span class="text-xs text-gray-500"><%= user.emailAddress %></span>
+                    </div>
+                  </div>
+                </td>
 
-                  <!-- ROLE -->
-                  <td>
-                    <%= user.role==="user" ? "Customer" : user.role %>
-                  </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <%= user.role==="user" ? "Customer" : user.role %>
+                </td>
 
-                  <!-- JOINED DATE -->
-                  <td>
-                    <%= new Date(user.createdAt).toLocaleDateString("en-IN", { day: "2-digit" , month: "short" ,
-                      year: "numeric" , }) %>
-                  </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <%= new Date(user.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) %>
+                </td>
 
-                  <!-- TOTAL SPEND -->
-                  <td style="font-weight:700;">
-                    ₹ <%= user.totalSpend.toLocaleString("en-IN") %>
-                  </td>
+                <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                  ₹ <%= user.totalSpend.toLocaleString("en-IN") %>
+                </td>
 
-                  <!-- STATUS -->
-                  <td>
-                    <% if (user.userStatus==="active" ) { %>
-                      <span class="badge status-active">Active</span>
-                      <% } else { %>
-                        <span class="badge status-suspended">Suspended</span>
-                        <% } %>
-                  </td>
+                <td class="px-6 py-4">
+                  <% if (user.userStatus==="active" ) { %>
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">Active</span>
+                  <% } else { %>
+                    <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">Suspended</span>
+                  <% } %>
+                </td>
 
-                  <!-- ACTION -->
-                  <td>
-                    <a href="/admin-seeuseralldetails/<%= user._id %>">
-                      <button class="btn-action">View Profile</button>
-                    </a>
-                  </td>
-                </tr>
-                <% }) %>
+                <td class="px-6 py-4">
+                  <a href="/admin-seeuseralldetails/<%= user._id %>" 
+                     class="text-xs font-semibold px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-sm">
+                    Profile
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
+  </div>
 
-  </main>
+</main>
+<script>
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("active");
+}
 
-  <script>
-    function toggleSidebar() {
-      document.getElementById("sidebar").classList.toggle("active");
-    }
-  </script>
+function toggleModal() {
+  const modal = document.getElementById("productModal");
+  modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+</script>
 </body>
 
 </html>

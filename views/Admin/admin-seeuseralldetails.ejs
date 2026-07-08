@@ -1,119 +1,113 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile | Rider Admin</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/admin-userdetails.css">
-  </head>
-  <body>
-    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-    <header class="mobile-header">
-      <span style="font-weight: 800">Rider Admin</span>
-      <i class="fa-solid fa-bars" style="font-size: 1.5rem; cursor: pointer;" onclick="toggleSidebar()"></i>
-    </header>
-
-    <%- include('../partials/adminNavBar') %>
+<%- include('../partials/adminTop') %>
+<%- include('../partials/adminNavBar') %>
 
     <main class="main-content">
-      <a href="/admin-userlist" style="text-decoration: none; color: var(--color-brand-accent); font-weight: 700; display: flex; align-items: center; gap: 5px; margin-bottom: 1.5rem;">
-        <i class="fa-solid fa-arrow-left"></i> Back to User List
-      </a>
+  <a href="/admin-userlist" class="inline-flex items-center gap-2 text-indigo-600 font-bold hover:text-indigo-800 transition-colors mb-8">
+    <i class="fa-solid fa-arrow-left"></i> Back to User List
+  </a>
 
-      <!-- Profile Card -->
-      <div class="profile-card">
-        <div class="profile-img-big">
-          <% if (user.profilePhoto) { %>
-            <img src="<%= user.profilePhoto %>" alt="<%= user.username %>">
-          <% } else { %>
-            <%= user.username.charAt(0).toUpperCase() + user.username.charAt(1).toUpperCase() %>
-          <% } %>
-        </div>
-        <div class="profile-details">
-          <h1><%= user.username %></h1>
-          <p>
-            Customer since 
-            <%= new Date(user.createdAt).toLocaleString('default', { month: 'long', year: 'numeric' }) %> 
-            • ID: #USR-<%= user._id.toString().slice(-5).toUpperCase() %>
-          </p>
-          <span class="status-pill">
-            <%= user.userStatus === "active" ? "Active Member" : "Suspended Member" %>
-          </span>
+  <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6 mb-8">
+    <div class="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center text-3xl font-black text-indigo-700 overflow-hidden shadow-inner">
+      <% if (user.profilePhoto) { %>
+        <img src="<%= user.profilePhoto %>" alt="<%= user.username %>" class="w-full h-full object-cover">
+      <% } else { %>
+        <%= user.username.substring(0,2).toUpperCase() %>
+      <% } %>
+    </div>
+    <div class="text-center md:text-left">
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight"><%= user.username %></h1>
+      <p class="text-gray-500 font-medium mt-1">
+        Customer since <%= new Date(user.createdAt).toLocaleString('default', { month: 'long', year: 'numeric' }) %> 
+        • <span class="font-bold text-gray-800">ID: #USR-<%= user._id.toString().slice(-5).toUpperCase() %></span>
+      </p>
+      <span class="inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest <%= user.userStatus === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+        <%= user.userStatus === "active" ? "Active Member" : "Suspended Member" %>
+      </span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl"><i class="fa-solid fa-bag-shopping"></i></div>
+      <div>
+        <h3 class="text-xl font-black text-gray-900">₹<%= user.totalSpend.toLocaleString('en-IN') %></h3>
+        <p class="text-xs font-bold text-gray-400 uppercase">Lifetime Spend</p>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 text-xl"><i class="fa-solid fa-truck"></i></div>
+      <div>
+        <h3 class="text-xl font-black text-gray-900"><%= user.totalOrders %></h3>
+        <p class="text-xs font-bold text-gray-400 uppercase">Total Orders</p>
+      </div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 text-xl"><i class="fa-solid fa-star"></i></div>
+      <div>
+        <h3 class="text-xl font-black text-gray-900">4.8</h3>
+        <p class="text-xs font-bold text-gray-400 uppercase">Reliability</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+      <h2 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2"><i class="fa-solid fa-address-book"></i> Contact Details</h2>
+      <div class="space-y-6">
+        <div><label class="text-[10px] font-black uppercase text-gray-400 block mb-1">Email Address</label><p class="font-bold text-gray-800"><%= user.emailAddress %></p></div>
+        <div><label class="text-[10px] font-black uppercase text-gray-400 block mb-1">Phone Number</label><p class="font-bold text-gray-800"><%= user.phoneNo %></p></div>
+        <div><label class="text-[10px] font-black uppercase text-gray-400 block mb-1">Shipping Address</label>
+          <p class="font-bold text-gray-800 leading-relaxed"><%= user.street %>, <%= user.city %>, <%= user.state %> - <%= user.pincode %></p>
         </div>
       </div>
+    </div>
 
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="mini-card">
-          <i class="fa-solid fa-bag-shopping"></i>
-          <h3>₹<%= user.totalSpend %></h3>
-          <span>Lifetime Spend</span>
-        </div>
-        <div class="mini-card">
-          <i class="fa-solid fa-truck"></i>
-          <h3><%= user.totalOrders %></h3>
-          <span>Total Orders</span>
-        </div>
-        <div class="mini-card">
-          <i class="fa-solid fa-star" style="color: #f59e0b"></i>
-          <h3>4.8</h3> <!-- Optional: calculate real reliability later -->
-          <span>Reliability</span>
-        </div>
+    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+      <h2 class="text-lg font-black text-gray-800 mb-6 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> Recent Order History</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-[10px] font-black uppercase text-gray-400 border-b">
+              <th class="pb-4">Order ID</th>
+              <th class="pb-4">Date</th>
+              <th class="pb-4">Amount</th>
+              <th class="pb-4">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            <% if (orders.length > 0) { %>
+              <% orders.forEach(order => { %>
+                <tr class="text-sm">
+                  <td class="py-4 font-bold text-gray-600">#<%= order._id.toString().slice(-5).toUpperCase() %></td>
+                  <td class="py-4 text-gray-500 font-medium"><%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                  <td class="py-4 font-black text-gray-900">₹<%= order.totalAmount.toLocaleString('en-IN') %></td>
+                  <td class="py-4">
+                    <span class="font-black text-xs <%= order.orderStatus === 'Delivered' ? 'text-green-600' : 'text-amber-500' %>">
+                      <%= order.orderStatus %>
+                    </span>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr><td colspan="4" class="py-10 text-center text-gray-400 font-bold italic">No orders found</td></tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
+    </div>
+  </div>
+</main>
+<script>
 
-      <!-- Contact & Orders -->
-      <div class="info-container">
-        <!-- Contact Details -->
-        <div class="info-box">
-          <h2><i class="fa-solid fa-address-book"></i> Contact Details</h2>
-          <div class="info-item"><label>Email Address</label><p><%= user.emailAddress %></p></div>
-          <div class="info-item"><label>Phone Number</label><p><%= user.phoneNo %></p></div>
-          <div class="info-item"><label>Shipping Address</label>
-            <p>
-              <%= user.street %>, <%= user.city %>, <%= user.state %> - <%= user.pincode %>
-            </p>
-          </div>
-        </div>
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("active");
+}
 
-        <!-- Recent Orders -->
-        <div class="info-box">
-          <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Order History</h2>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr><th>Order ID</th><th>Date</th><th>Amount</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                <% if (orders.length > 0) { %>
-                  <% orders.forEach(order => { %>
-                    <tr>
-                      <td>#<%= order._id.toString().slice(-5).toUpperCase() %></td>
-                      <td>
-                        <%= new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %>
-                      </td>
-                      <td>₹<%= order.totalAmount %></td>
-                      <td style="color: <%= order.orderStatus === 'Delivered' ? 'var(--color-success)' : 'var(--color-warning)' %>; font-weight: 700">
-                        <%= order.orderStatus %>
-                      </td>
-                    </tr>
-                  <% }) %>
-                <% } else { %>
-                  <tr><td colspan="4" style="text-align:center;">No orders found</td></tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <script>
-      function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('overlay').classList.toggle('active');
-      }
-    </script>
+function toggleModal() {
+  const modal = document.getElementById("productModal");
+  modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+</script>
   </body>
 </html>

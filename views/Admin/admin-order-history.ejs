@@ -1,119 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <title>Order History | Rider Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="/css/admin-newoder.css"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              light: '#F3E8FF',
-              DEFAULT: '#C084FC',
-              dark: '#6B21A8',
-            }
-          }
-        }
-      }
-    }
-  </script>
-</head>
-
-<body class="bg-gray-50">
-
-<header class="mobile-header">
-  <span style="font-weight:800;font-size:1.2rem">Rider Admin</span>
-  <i class="fa-solid fa-bars" onclick="toggleSidebar()"></i>
-</header>
-
+<%- include('../partials/adminTop') %>
 <%- include('../partials/adminNavBar') %>
 
-<main class="main-content p-4 md:p-8">
+<main class="main-content">
   <h1 class="text-2xl font-black text-gray-800">Order History</h1>
-  <p class="text-gray-500 mb-6 mt-4">All delivered & cancelled orders</p>
+  <p class="text-gray-500 mb-6 mt-2">All delivered & cancelled orders</p>
 
-  <div class="table-container bg-white rounded-3xl shadow-sm overflow-hidden" style="overflow-x: auto;">
-    <table class="w-full text-left border-collapse">
-      <thead class="bg-gray-50 border-b border-gray-100">
-        <tr>
-          <div class="grid grid-cols-7 gap-4 flex items-center justify-center">
-            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Order ID</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Profile</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Customer</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Price</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Status</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">Action</th>
-          <th class="p-4 text-[10px] font-black uppercase text-gray-400">User Bill</th>
-          </div>
-        </tr>
-      </thead>
-
-      <tbody>
-        <% if (orders.length === 0) { %>
+  <div class="table-container bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50 border-b border-gray-100">
           <tr>
-            <td colspan="6" class="p-10 text-center text-gray-400 font-bold">No order history found</td>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Order ID</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Profile</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Customer</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Price</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400">Status</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400 text-center">Action</th>
+            <th class="p-4 text-[10px] font-black uppercase text-gray-400 text-center">User Bill</th>
           </tr>
-        <% } %>
+        </thead>
 
-        <% orders.forEach(order => { %>
-          <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-bold text-gray-400">#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+        <tbody class="divide-y divide-gray-50">
+          <% if (orders.length === 0) { %>
+            <tr>
+              <td colspan="7" class="p-10 text-center text-gray-400 font-bold">No order history found</td>
+            </tr>
+          <% } %>
 
-            <td class="p-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-brand-light text-brand-dark rounded-full flex items-center justify-center font-black">
-                  <%= order.user.username.charAt(0).toUpperCase() %>
+          <% orders.forEach(order => { %>
+            <tr class="hover:bg-gray-50/50 transition-colors">
+              <td class="p-4 font-bold text-gray-400 text-sm">#<%= order._id.toString().slice(-6).toUpperCase() %></td>
+
+              <td class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center font-black">
+                    <%= order.user.username.charAt(0).toUpperCase() %>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-800 leading-tight"><%= order.user.username %></p>
+                    <small class="text-indigo-600 font-bold text-[10px] uppercase"><%= order.paymentMethod %></small>
+                  </div>
                 </div>
-                <div>
-                  <p class="font-bold text-gray-800 leading-tight"><%= order.user.username %></p>
-                  <small class="text-brand-dark font-bold text-[10px] uppercase"><%= order.paymentMethod %></small>
+              </td>
+
+              <td class="p-4 font-black text-gray-700 uppercase text-xs"><%= order.name %></td>
+              <td class="p-4 font-black text-gray-900 italic text-sm">₹<%= order.totalAmount %></td>
+
+              <td class="p-4">
+                <% if(order.orderStatus === "Delivered"){ %>
+                  <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Delivered</span>
+                <% } else { %>
+                  <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Cancelled</span>
+                <% } %>
+              </td>
+
+              <td class="p-4 text-center">
+                <div class="flex flex-col gap-2 items-center">
+                  <button class="bg-gray-900 text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all" 
+                    onclick='openOrderModal(<%- JSON.stringify(order) %>)'>View Order</button>
+                  <a href="/admin-seeuseralldetails/<%= order.user._id %>" class="text-[9px] font-bold text-red-600 hover:text-gray-900 uppercase">User Profile</a>
                 </div>
-              </div>
-            </td>
-
-            <td class="p-4 font-black text-gray-700 uppercase text-xs"><%= order.name %></td>
-            <td class="p-4 font-black text-gray-900 italic">₹<%= order.totalAmount %></td>
-
-            <td class="p-4">
-              <% if(order.orderStatus === "Delivered"){ %>
-                <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Delivered</span>
-              <% } else { %>
-                <span class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-tighter italic">Cancelled</span>
-              <% } %>
-            </td>
-
-            <td class="p-4">
-              <div class="flex flex-col gap-1">
-                <button 
-                  class="bg-brand-dark text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all"
-                  onclick='openOrderModal(<%- JSON.stringify(order) %>)'>
-                  View Oder
-                </button>
-                <a href="/admin-seeuseralldetails/<%= order.user._id %>" class="text-center text-[9px] font-bold text-red-600 hover:text-brand-dark uppercase">
-                  User Profile
-                </a>
-              </div>
-            </td>
-            <td>
-              <div>
-                <button 
-                class="bg-brand-dark text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all" 
-                onclick='openUserBillModal(<%- JSON.stringify(order) %>)'>
-                  View User Bill
-                </button>
-              </div>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+              </td>
+              
+              <td class="p-4 text-center">
+                <button class="bg-gray-900 text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl hover:shadow-lg transition-all" 
+                  onclick='openUserBillModal(<%- JSON.stringify(order) %>)'>View Bill</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 <!-- ================================== View Order Modal ================================== -->
@@ -233,102 +190,115 @@
     </div>
 </div>
 <script>
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("active");
+    // --- SIDEBAR TOGGLE ---
+  function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("active");
 }
 
-function openOrderModal(order) {
-    // Basic Details
-    document.getElementById('modalOrderId').innerText = "ID: #" + order._id.toString().toUpperCase();
-    document.getElementById('modalOrderStatus').innerText = order.orderStatus.toUpperCase();
-    document.getElementById('modalDate').innerText = "Date: " + new Date(order.createdAt).toLocaleDateString('en-IN');
-    document.getElementById('modalName').innerText = order.name;
-    document.getElementById('modalAddress').innerText = `${order.address}, ${order.pincode}, ${order.state}`;
-    document.getElementById('modalMobile').innerText = "📞 " + order.mobile;
-    document.getElementById('modalPayId').innerText = order.paymentId || "N/A";
+function toggleModal() {
+  const modal = document.getElementById("productModal");
+  modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+    // --- ORDER MODAL LOGIC ---
+    function openOrderModal(order) {
+        // Validation: Check if order exists
+        if (!order) return;
 
-    // Billing
-    document.getElementById('modalTotal').innerText = "₹" + order.totalAmount;
-    document.getElementById('modalPaid').innerText = "₹" + (order.advancePaid || 0);
-    document.getElementById('modalDue').innerText = "₹" + (order.amountDue || 0);
+        // Basic Details
+        document.getElementById('modalOrderId').innerText = "ID: #" + (order._id || "").toString().slice(-6).toUpperCase();
+        document.getElementById('modalOrderStatus').innerText = (order.orderStatus || "N/A").toUpperCase();
+        document.getElementById('modalDate').innerText = "Date: " + new Date(order.createdAt).toLocaleDateString('en-IN');
+        document.getElementById('modalName').innerText = order.name || "N/A";
+        document.getElementById('modalAddress').innerText = `${order.address || ''}, ${order.pincode || ''}, ${order.state || ''}`;
+        document.getElementById('modalMobile').innerText = "📞 " + (order.mobile || "N/A");
+        document.getElementById('modalPayId').innerText = order.paymentId || "N/A";
 
-    // Items List
-    const itemsContainer = document.getElementById('modalItems');
-    itemsContainer.innerHTML = '';
+        // Billing Summary
+        document.getElementById('modalTotal').innerText = "₹" + (order.totalAmount || 0).toLocaleString('en-IN');
+        document.getElementById('modalPaid').innerText = "₹" + (order.advancePaid || 0).toLocaleString('en-IN');
+        document.getElementById('modalDue').innerText = "₹" + (order.amountDue || 0).toLocaleString('en-IN');
 
-    order.items.forEach(item => {
-        const itemHtml = `
-            <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-brand-light rounded-xl flex flex-col items-center justify-center leading-none">
-                        <span class="text-[10px] font-black text-brand-dark uppercase">Size</span>
-                        <span class="text-lg font-black text-brand-dark italic">${item.size || '-'}</span>
+        // Items List Rendering
+        const itemsContainer = document.getElementById('modalItems');
+        itemsContainer.innerHTML = ''; // Clear existing
+
+        if (order.items && order.items.length > 0) {
+            order.items.forEach(item => {
+                itemsContainer.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-50 rounded-xl flex flex-col items-center justify-center leading-none">
+                                <span class="text-[9px] font-black text-gray-400 uppercase">Size</span>
+                                <span class="text-md font-black text-gray-800 italic">${item.size || '-'}</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-black text-gray-800 uppercase">${item.product?.title || 'Product'}</p>
+                                <p class="text-[10px] text-gray-400 font-bold italic">Qty: ${item.qty} × ₹${item.price}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-gray-900 italic">₹${(item.total || 0).toLocaleString('en-IN')}</p>
+                        </div>
                     </div>
+                `;
+            });
+        }
+
+        document.getElementById('orderModal').classList.remove('hidden');
+        document.getElementById('orderModal').classList.add('flex');
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.add('hidden');
+        document.getElementById('orderModal').classList.remove('flex');
+    }
+
+    // --- BILL MODAL LOGIC ---
+    function openUserBillModal(order) {
+        if (!order) return;
+
+        document.getElementById('billCustName').innerText = order.name || "N/A";
+        document.getElementById('billCustMobile').innerText = "+91 " + (order.mobile || "N/A");
+        document.getElementById('billDate').innerText = new Date(order.createdAt).toLocaleDateString('en-IN');
+        document.getElementById('billId').innerText = "INV-" + order._id.toString().slice(-6).toUpperCase();
+        document.getElementById('billPayMethod').innerText = (order.paymentMethod || "COD").toUpperCase();
+
+        document.getElementById('billGrandTotal').innerText = "₹" + (order.totalAmount || 0).toLocaleString('en-IN');
+        document.getElementById('billPaidAmt').innerText = "- ₹" + (order.advancePaid || 0).toLocaleString('en-IN');
+        document.getElementById('billDueAmt').innerText = "₹" + (order.amountDue || 0).toLocaleString('en-IN');
+
+        const listContainer = document.getElementById('billItemsList');
+        listContainer.innerHTML = ''; 
+
+        order.items.forEach(item => {
+            listContainer.innerHTML += `
+                <div class="flex justify-between items-start border-b border-gray-100 pb-2">
                     <div>
-                        <p class="text-xs font-black text-gray-800 uppercase tracking-tight">${item.product.title}</p>
-                        <p class="text-[10px] text-gray-400 font-bold italic">Qty: ${item.qty} × ₹${item.price}</p>
+                        <p class="text-xs font-black text-gray-800 uppercase tracking-tighter">${item.product?.title || 'Product'}</p>
+                        <p class="text-[9px] text-gray-400 font-bold">SIZE: ${item.size || 'N/A'} | QTY: ${item.qty} x ₹${item.price}</p>
                     </div>
+                    <p class="text-xs font-black text-gray-900 italic">₹${(item.total || 0).toLocaleString('en-IN')}</p>
                 </div>
-                <div class="text-right">
-                    <p class="font-black text-gray-900 italic">₹${item.total}</p>
-                </div>
-            </div>
-        `;
-        itemsContainer.innerHTML += itemHtml;
-    });
+            `;
+        });
 
-    document.getElementById('orderModal').classList.remove('hidden');
-}
+        document.getElementById('userBillModal').classList.remove('hidden');
+        document.getElementById('userBillModal').classList.add('flex');
+    }
 
-function closeOrderModal() {
-    document.getElementById('orderModal').classList.add('hidden');
-}
+    function closeBillModal() {
+        document.getElementById('userBillModal').classList.add('hidden');
+        document.getElementById('userBillModal').classList.remove('flex');
+    }
 
-// Esc Key to close
-window.onkeydown = function(e) {
-  if (e.key === "Escape") closeOrderModal();
-}
-</script>
-
-
-<script>
-  function openUserBillModal(order) {
-    // 1. Customer & Order Info
-    document.getElementById('billCustName').innerText = order.name;
-    document.getElementById('billCustMobile').innerText = "+91 " + order.mobile;
-    document.getElementById('billDate').innerText = new Date(order.createdAt).toLocaleDateString('en-IN');
-    document.getElementById('billId').innerText = "INV-" + order._id.toString().slice(-6).toUpperCase();
-    document.getElementById('billPayMethod').innerText = "Payment: " + order.paymentMethod;
-
-    // 2. Billing Figures
-    document.getElementById('billGrandTotal').innerText = "₹" + order.totalAmount;
-    document.getElementById('billPaidAmt').innerText = "- ₹" + (order.advancePaid || 0);
-    document.getElementById('billDueAmt').innerText = "₹" + (order.amountDue || 0);
-
-    // 3. Dynamic Items List
-    const listContainer = document.getElementById('billItemsList');
-    listContainer.innerHTML = ''; // Clear previous
-
-    order.items.forEach(item => {
-        const itemRow = `
-            <div class="flex justify-between items-start border-b border-gray-50 pb-2">
-                <div>
-                    <p class="text-xs font-black text-gray-800 uppercase tracking-tighter">${item.product.title}</p>
-                    <p class="text-[9px] text-gray-400 font-bold">SIZE: ${item.size || 'N/A'} | QTY: ${item.qty} x ₹${item.price}</p>
-                </div>
-                <p class="text-xs font-black text-gray-900 italic">₹${item.total}</p>
-            </div>
-        `;
-        listContainer.innerHTML += itemRow;
-    });
-
-    // 4. Show Modal
-    document.getElementById('userBillModal').classList.remove('hidden');
-}
-
-function closeBillModal() {
-    document.getElementById('userBillModal').classList.add('hidden');
-}
+    // Global Key Listener
+    window.onkeydown = function(e) {
+        if (e.key === "Escape") {
+            closeOrderModal();
+            closeBillModal();
+        }
+    }
 </script>
 
 </body>

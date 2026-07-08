@@ -1,134 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('../partials/adminTop') %>
+<%- include('../partials/adminNavBar') %> 
+<main class="main-content">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">Order Management</h1>
+    <p class="text-sm text-gray-500">View and manage customer shipments</p>
+  </div>
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Orders | Rider Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/admin-newoder.css" />
-</head>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-gray-600 text-[10px] uppercase tracking-wider font-bold">
+            <th class="px-6 py-4">Order ID</th>
+            <th class="px-6 py-4">Customer</th>
+            <th class="px-6 py-4">Products</th>
+            <th class="px-6 py-4 text-right">Advance</th>
+            <th class="px-6 py-4 text-right">Total</th>
+            <th class="px-6 py-4 text-right">Due</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Date</th>
+            <th class="px-6 py-4 text-center">Action</th>
+          </tr>
+        </thead>
 
-<body>
-
-  <header class="mobile-header">
-    <span style="font-weight: 800; font-size: 1.2rem">Rider Admin</span>
-    <i class="fa-solid fa-bars" onclick="toggleSidebar()"></i>
-  </header>
-
-  <%- include('../partials/adminNavBar') %>
-
-    <main class="main-content">
-      <h1>Order Management</h1>
-      <p>View and manage customer shipments</p>
-
-      <div class="table-container">
-        <table>
-          <thead>
+        <tbody class="divide-y divide-gray-100">
+          <% if (orders.length === 0) { %>
             <tr>
-              <th>ORDER ID</th>
-              <th>PROFILE</th>
-              <th>CUSTOMER</th>
-              <th>PRODUCTS</th>
-              <th>ADVANCE</th>
-              <th>PRICE</th>
-              <th>DUE</th>
-              <th>STATUS</th>
-              <th>DATE</th>
-              <th>ACTION</th>
+              <td colspan="9" class="px-6 py-10 text-center text-gray-500">No new orders</td>
             </tr>
-          </thead>
+          <% } else { %>
+            <% orders.forEach(order => { %>
+              <tr class="hover:bg-gray-50/50 transition-colors">
+                
+                <td class="px-6 py-4 text-sm font-medium text-indigo-600">
+                  #<%= order._id.toString().slice(-6).toUpperCase() %>
+                </td>
 
-          <tbody>
-            <% if (orders.length===0) { %>
-              <tr>
-                <td colspan="7" style="text-align:center;">No new orders</td>
-              </tr>
-              <% } %>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                      <%= order.user.username.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="text-sm">
+                      <p class="font-semibold text-gray-900"><%= order.user.username %></p>
+                      <p class="text-xs text-gray-400"><%= order.paymentMethod %></p>
+                    </div>
+                  </div>
+                </td>
 
-                <% orders.forEach(order=> { %>
-                  <tr>
-                    <td>#<%= order._id.toString().slice(-6).toUpperCase() %>
-                    </td>
-
-                    <td>
-                      <div class="customer-info">
-                        <div class="avatar">
-                          <%= order.user.username.charAt(0).toUpperCase() %>
-                        </div>
-                        <div>
-                          <strong>
-                            <%= order.user.username %>
-                          </strong><br>
-                          <small>
-                            <%= order.paymentMethod %>
-                          </small>
-                        </div>
-                      </div>
-                    </td>
-
-                     <td><b><%= order.name %></b></td>
-
-                    <td>
-                      <% order.items.forEach(i=> { %>
-                        <div style="margin-bottom:6px">
-                          <b>
-                            <%= i.product.title %>
-                          </b>
-                          <% if(i.size){ %>
-                            | Size: <%= i.size %>
-                              <% } %>
-                                × <%= i.qty %>
-                        </div>
-                        <% }) %>
-
-                    </td>
-
-                    <td><b>₹<%= order.advancePaid %></b></td>
-
-                    <td><b>₹<%= order.totalAmount %></b></td>
-
-                    <td><b>₹<%= order.amountDue %></b></td>
-
-                    <td>
-                      <span class="badge badge-pending">
-                        <%= order.orderStatus %>
-                      </span>
-                    </td>
-
-                    <td>
-                      <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
-                    </td>
-
-                    <td>
-                      <form action="/admin-update-order-status" method="POST">
-                        <input type="hidden" name="orderId" value="<%= order._id %>">
-
-                        <select name="status" required>
-                          <option value="">Select</option>
-                          <option value="Cancelled">Cancel</option>
-                          <option value="Delivered">Delivered</option>
-                        </select>
-
-                        <button type="submit" class="btn-view" style="margin-top:6px;">
-                          Update
-                        </button>
-                      </form>
-                    </td>
-
-                  </tr>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <% order.items.forEach(i => { %>
+                    <div class="mb-1 text-xs">
+                      <span class="font-bold text-gray-800"><%= i.product.title %></span>
+                      <%= i.size ? `| Size: ${i.size}` : '' %> × <%= i.qty %>
+                    </div>
                   <% }) %>
-          </tbody>
-        </table>
-      </div>
+                </td>
 
-    </main>
+                <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">₹<%= order.advancePaid %></td>
+                <td class="px-6 py-4 text-sm font-semibold text-gray-900 text-right">₹<%= order.totalAmount %></td>
+                <td class="px-6 py-4 text-sm font-bold text-red-600 text-right">₹<%= order.amountDue %></td>
 
-    <script>
-      function toggleSidebar() {
-        document.getElementById("sidebar").classList.toggle("active");
-      }
-    </script>
+                <td class="px-6 py-4">
+                  <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-full bg-yellow-100 text-yellow-700">
+                    <%= order.orderStatus %>
+                  </span>
+                </td>
+
+                <td class="px-6 py-4 text-xs text-gray-500">
+                  <%= new Date(order.createdAt).toLocaleDateString("en-IN") %>
+                </td>
+
+                <td class="px-6 py-4">
+                  <form action="/admin-update-order-status" method="POST" class="flex flex-col gap-2">
+                    <input type="hidden" name="orderId" value="<%= order._id %>">
+                    <select name="status" class="text-xs border rounded-lg p-1.5 focus:ring-1 focus:ring-indigo-500 outline-none">
+                      <option value="">Update</option>
+                      <option value="Cancelled">Cancel</option>
+                      <option value="Delivered">Delivered</option>
+                    </select>
+                    <button type="submit" class="text-[10px] bg-indigo-600 text-white py-1 px-3 rounded-lg hover:bg-indigo-700 transition-all">
+                      Save
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+   
+ <script src="/js/adminDashbord.js"></script>
 
 </body>
 

@@ -6,9 +6,9 @@ const productSchema = new mongoose.Schema(
 
     description: { type: String, trim: true },
 
+    // 🔥 FIX: 'enum' hata diya hai taaki koi bhi dynamic category save ho sake
     category: {
-      type: String,
-      enum: ["shoes", "watch", "clothes", "glasses", "bags", "crocs", "sliders"],
+      type: String, 
       required: true,
     },
 

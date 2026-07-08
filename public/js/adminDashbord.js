@@ -7,3 +7,5 @@ function toggleModal() {
   const modal = document.getElementById("productModal");
   modal.style.display = modal.style.display === "flex" ? "none" : "flex";
 }
+
+

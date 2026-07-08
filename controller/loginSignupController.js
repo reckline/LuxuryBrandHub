@@ -33,7 +33,6 @@ exports.getLogin = (req, res, next) => {
     next(error);
   }
 };
-
 exports.postLogin = [
   // 🔹 Username OR Phone
   check("login")
@@ -99,12 +98,24 @@ exports.postLogin = [
       // 4️⃣ Create session
       req.session.isLoggedIn = true;
       req.session.user = {
-        _id: user._id.toString(), // ⭐ FIX (ObjectId issue solved)
+        _id: user._id.toString(),
         username: user.username,
         role: user.role,
         profilePhoto: user.profilePhoto,
       };
+
+      // ⭐ FIX: Agar user admin hai, toh req.session.admin set karein
+      if (user.role === "admin") {
+        req.session.admin = {
+            _id: user._id.toString(),
+            username: user.username,
+            role: user.role
+        };
+      }
+
+      // 5️⃣ Save session to DB
       await req.session.save();
+
       // ✅ ROLE BASED REDIRECT
       if (user.role === "admin") {
         return res.redirect("/admin-home");

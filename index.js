@@ -139,7 +139,17 @@
 //     });
 //   })
 //   .catch((err) => console.log("❌ Database connection error:", err));
+
+
+
+
+
+
 require("dotenv").config();
+
+// FIX: MaxListenersExceededWarning ke liye
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 console.log("DEBUG ENV:", process.env.MONGO_URI);
 
 const express = require("express");
@@ -154,7 +164,7 @@ const adminRouter = require("./routes/adminRouter");
 const paymentRouter = require("./routes/paymentRoutes");
 const loginSignupRouter = require("./routes/loginSignupRouter");
 const User = require("./model/userSchema");
-const Category = require("./model/categorySchema"); // Category model import kiya
+const Category = require("./model/categorySchema");
 
 const app = express();
 app.set("view engine", "ejs");
@@ -163,15 +173,22 @@ app.set("views", "views");
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
   collection: "sessions",
+  touchAfter: 24 * 3600 // Session ko baar-baar update nahi karega, 24 ghante mein ek baar
 });
 store.on("error", console.log);
 
+// SESSION CONFIGURATION
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "mysecret",
-    resave: false,
-    saveUninitialized: false,
+    resave: false,               
+    saveUninitialized: false,    
     store: store,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      httpOnly: true,
+      sameSite: 'lax' // Session persistence ke liye zaroori
+    }
   })
 );
 
@@ -183,11 +200,12 @@ app.use(express.static(path.join(rootDir, "public")));
 
 app.use(async (req, res, next) => {
   try {
+    // Session variables setup
     res.locals.isLoggedIn = req.session.isLoggedIn || false;
     res.locals.user = req.session.user || null;
     
     // --- ADMIN DATA FIX ---
-    res.locals.admin = req.session.admin || { username: "Admin" }; 
+    res.locals.admin = req.session.admin || null; 
 
     // --- DYNAMIC CATEGORIES FOR SIDEBAR ---
     res.locals.allCategories = [];

@@ -1,26 +1,29 @@
-<aside class="sidebar" style="overflow: overlay;" id="sidebar">
-    <div style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-        ">
-      <h2><i class="fa-solid fa-bolt"></i><%-admin.username%></h2>
-      <i class="fa-solid fa-xmark" class="hide-desktop" style="cursor: pointer; font-size: 1.5rem; display: none"
-        onclick="toggleSidebar()" id="closeSidebar"></i>
+<aside class="sidebar" id="sidebar" style="overflow: overlay;">
+
+      <nav>
+    <a href="/admin-home" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+    <a href="/admin-userlist" class="nav-link"><i class="fa-solid fa-users"></i> My Users</a>
+    <a href="/admin-category" class="nav-link"><i class="fa-solid fa-folder-plus"></i> Manage Categories</a>
+
+    <div class="mt-4 border-t pt-4">
+        <p class="text-xs text-gray-500 uppercase px-4 mb-2">My Categories</p>
+        <% if (locals.allCategories && allCategories.length > 0) { %>
+            <% allCategories.forEach(cat => { %>
+                <a href="/admin/category/<%= cat.name.toLowerCase() %>" class="nav-link">
+                    <i class="fa-solid fa-tag"></i> <%= cat.name %>
+                </a>
+            <% }) %>
+        <% } %>
     </div>
-    <nav>
-      <a href="/admin-home" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-      <a href="/admin-userlist" class="nav-link"><i class="fa-solid fa-users"></i> My Users</a>
-      <a href="/admin-howmanyshoesuploaded" class="nav-link"><i class="fa-solid fa-shoe-prints"></i> Add Shoes</a>
-      <a href="/admin-howmanyglassesuploaded" class="nav-link"><i class="fa-solid fa-glasses"></i></i> Add Glasses</a>
-      <a href="/admin-howmanywatchesuploaded" class="nav-link"><i class="fa-solid fa-stopwatch"></i> Add Watches</a>
-      <a href="/admin-howmanyclothesuploaded" class="nav-link"><i class="fa-solid fa-shirt"></i> Add Clothes</a>
-      <a href="/admin-howmanybagsuploaded" class="nav-link"><i class="fa-solid fa-bag-shopping"></i> Add Bags</a>
-      <a href="/admin-howmanyslidersuploaded" class="nav-link"><i class="fa-solid fa-shoe-prints"></i> Add Sliders</a>
-      <a href="/admin-howmanycrocsuploaded" class="nav-link"><i class="fa-solid fa-shoe-prints"></i> Add Crocs</a>
-      <a href="/admin-newoder" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> New Orders</a>
-      <a href="/admin-order-history" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Orders History</a>
-      <a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-    </nav>
+
+    <div class="mt-4 border-t pt-4">
+        <a href="/admin-newoder" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> New Orders</a>
+        <a href="/admin-order-history" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Orders History</a>
+        <a href="/logout" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </div>
+</nav>
   </aside>
+
+
+
+

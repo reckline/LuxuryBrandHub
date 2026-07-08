@@ -1,0 +1,458 @@
+<%- include('../partials/adminTop') %>
+<%- include('../partials/adminNavBar') %> 
+
+<main class="ml-0 md:ml-64 p-1 md:p-8 bg-gray-50 min-h-screen">
+  <!-- ======================== Add Brands ============================================= -->
+  <div class="max-w-8xl mx-auto bg-white p-2 rounded-2xl shadow-xl border border-gray-100 mb-10">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-m font-extrabold text-gray-900 capitalize tracking-tight"><%= category.name %> </h1>
+      <span class="px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200">Active</span>
+    </div>
+    <div class="bg-gray-900 p-8 rounded-2xl mb-10 shadow-2xl">
+      <h3 class="text-m font-bold mb-6 text-white flex items-center gap-2">
+        <i class="fa-solid fa-plus-circle text-blue-400"></i> Add New Brand
+      </h3>
+      <form action="/admin/add-brand" method="POST" class="flex flex-col md:flex-row gap-4">
+        <input type="hidden" name="categoryId" value="<%= category._id %>">
+        <input type="hidden" name="categoryName" value="<%= category.name %>">
+        <input type="text" name="brandName" placeholder="e.g. Nike, Apple..." class="flex-1 p-4 bg-gray-800 border-none rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-blue-900/50"> Add Now </button>
+      </form>
+    </div>
+<div>
+  <h3 class="text-m font-bold mb-6 text-gray-800">Existing Brands (<%= (category.brands && category.brands.length) ? category.brands.length : 0 %>)</h3>
+  
+  <% if (category.brands && category.brands.length > 0) { %>
+    <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <% category.brands.forEach(brand => { %>
+        <div class="group relative bg-white border border-gray-200 p-2 rounded-2xl text-center font-medium shadow-sm hover:shadow-md transition-all">
+          <span class="text-gray-700 block mb-1"><%= brand %></span>
+          
+          <button type="button" 
+                  onclick="deleteBrand('<%= category._id %>', '<%= brand %>')"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-times text-[10px]"></i>
+          </button>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400">
+      <i class="fa-solid fa-tags text-4xl mb-3"></i>
+      <p>No brands added yet.</p>
+    </div>
+  <% } %>
+</div>
+  </div>
+  <!-- ==================================================== Add Size ======================================================= -->
+<div class="bg-white p-6 mb-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+    <div>
+        <h3 class="text-xs font-black text-gray-900 uppercase tracking-widest">Size Management</h3>
+        <p class="text-[10px] text-gray-400 font-bold uppercase mt-1">Add and manage product sizes</p>
+    </div>
+
+    <form id="sizeAddForm" action="/admin-add-size" method="POST" class="flex gap-2">
+        <input type="hidden" name="categoryId" value="<%= category._id %>" />
+        <input type="text" name="sizeName" placeholder="e.g. 11" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" required />
+        <button type="submit" class="px-6 py-3 bg-blue-600 text-white text-xs font-black uppercase rounded-xl hover:bg-black transition-all whitespace-nowrap">Add Size</button>
+    </form>
+
+    <div class="space-y-3">
+        <label class="text-[9px] font-black text-gray-400 uppercase ml-1 block">Available Sizes</label>
+        <div class="flex flex-wrap gap-2" id="sizeContainer">
+            <% if (typeof sizes !== 'undefined' && sizes.length > 0) { %>
+                <% sizes.forEach(size => { %>
+                    <div class="relative group">
+                        <label class="cursor-pointer">
+                            <input type="checkbox" name="sizes" value="<%= size %>" class="peer hidden" />
+                            <span class="w-12 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-xs font-black text-gray-500 border border-gray-200 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-700 transition-all uppercase shadow-sm">
+                                <%= size %>
+                            </span>
+                        </label>
+                        <button type="button" onclick="deleteSize('<%= category._id %>', '<%= size %>')" 
+                                class="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 flex items-center justify-center rounded-full text-[8px] font-black opacity-0 group-hover:opacity-100 transition-opacity">
+                            x
+                        </button>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="w-full py-4 text-center border-2 border-dashed border-gray-100 rounded-xl">
+                    <p class="text-[10px] text-gray-400 font-bold">No sizes added yet.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+
+  <!-- =============================================== Product Management ============================================= -->
+  <header class="flex justify-between items-center flex-wrap gap-4 mb-8">
+    <h1 class="text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900">Shoe Products</h1>
+    <div class="flex gap-4">
+      <select id="Display" onchange="filterShoes(this.value)" class="bg-white border border-gray-200 rounded-xl px-4 py-2 font-bold text-sm outline-none">
+        <option value="all">All</option>
+        <option value="show">Show (Active)</option>
+        <option value="hide">Hide (Hidden)</option>
+      </select>
+      <button class="bg-gray-900 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-600 transition-all" onclick="openModal('addModal')">+ Add New Shoes</button>
+    </div>
+  </header>
+  <div class="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100 p-4">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="text-gray-400 uppercase text-[10px] font-black tracking-widest border-b border-gray-100">
+          <th class="p-4">Product</th>
+          <th class="p-4">Brand / Gender</th>
+          <th class="p-4">Price / Offer</th>
+          <th class="p-4">Stock</th>
+          <th class="p-4">Status</th>
+          <th class="p-4 text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody" class="divide-y divide-gray-50"><% if (typeof products !== 'undefined' && products.length > 0) { %><% /* slice().reverse() se latest products upar aa jayenge */ %><% products.slice().reverse().forEach(product => { %> <tr class="group hover:bg-gray-50 transition-colors">
+          <td class="p-4 flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl overflow-hidden bg-gray-200">
+              <img src="<%= product.images && product.images.length > 0 ? product.images[0] : '/default-shoe.png' %>" alt="<%= product.title %>" class="w-full h-full object-cover">
+            </div>
+            <span class="font-bold text-gray-900"><%= product.title %> </span>
+          </td>
+          <td class="p-4">
+            <span class="block font-black text-blue-600 text-[11px] uppercase"><%= product.brand %> </span>
+            <span class="text-gray-400 text-xs font-medium"><%= product.gender %> </span>
+          </td>
+          <td class="p-4">
+            <div class="flex flex-col">
+              <span class="font-black text-gray-900">₹<%= product.offerPrice || product.price %> </span><% if(product.offerPercentage > 0){ %> <span class="text-[10px] text-red-500 font-bold"><%= product.offerPercentage %>% OFF </span><% } %>
+            </div>
+          </td>
+          <td class="p-4 text-sm font-bold text-gray-700"><%= product.totalStock %> Units </td>
+          <td class="p-4">
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase <%= product.status === 'active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500' %>"><%= product.status %> </span>
+          </td>
+          <td class="p-4 text-center">
+            <button class="bg-gray-900 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl hover:bg-blue-600 transition-all" data-id="<%= product._id %>" onclick="openEditModalFromBtn(this)"> Modify </button>
+            <script type="application/json" id="product-<%= product._id %>">
+             <%- JSON.stringify(product).replace(/</g, '\\u003c') %>
+            </script>
+          </td>
+        </tr><% }) %><% } else { %> <tr>
+          <td colspan="6" class="text-center py-12 text-gray-400 font-bold">No products found in this category.</td>
+        </tr><% } %> </tbody>
+    </table>
+  </div>
+  <!-- ========================================================== Add Product Modal ===========================================-->
+  <form id="productAddForm" action="/admin-howmanyshoesuploaded" method="POST" enctype="multipart/form-data">
+    <div class="modal-overlay hidden fixed inset-0 bg-black/50 z-[9999] items-center justify-center" id="addModal">
+      <div class="modal-box bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl m-4">
+        <div class="flex flex-col max-h-[90vh]">
+          <div class="px-6 py-4 border-b border-gray-100 flex-shrink-0 bg-white">
+            <h2 class="text-xl font-black tracking-tighter text-gray-900 uppercase">Add New <span class="text-blue-600">Shoes</span>
+            </h2>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Fill in the details to list a new pair</p>
+          </div>
+          <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-5" style="max-height: 60vh;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Shoes Name</label>
+                <input type="text" name="title" placeholder="Shoes Name" class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+              </div>
+              <div class="form-group">
+                <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Price (₹)</label>
+                <input type="number" name="price" placeholder="₹ 0.00" class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Product Description</label>
+              <textarea name="description" rows="3" placeholder="Enter product description" class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none resize-none transition-all" required></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="form-group">
+                <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Offer (%)</label>
+                <input type="number" name="offerPercentage" value="0" class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div class="form-group">
+                <label class="text-[10px] font-black text-gray-400 uppercase ml-2 mb-1 block">Total Stock</label>
+                <input type="number" name="totalStock" placeholder="Total Stock" class="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" required />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 p-5 bg-gray-50 rounded-[2rem] border border-gray-100">
+              <div class="flex flex-col text-center">
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-1">Gender</label>
+                <select name="gender" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer" required>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="unisex">Unisex</option>
+                </select>
+              </div>
+              <div class="flex flex-col text-center border-l border-gray-200">
+                <label class="text-[9px] font-black text-gray-400 uppercase mb-1">Brand</label>
+                <select name="brand" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer" required>
+                  <option value="" disabled selected>Select a Brand</option><% if (category.brands && category.brands.length > 0) { %><% category.brands.forEach(brand => { %> <option value="<%= brand %>"><%= brand %> </option><% }) %><% } else { %> <option value="" disabled>No brands available</option><% } %>
+                </select>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <label class="text-[10px] font-black text-gray-400 uppercase ml-2 block italic">Select Sizes ✔</label>
+              <div class="flex flex-wrap gap-2 px-1"><% if (typeof sizes !== 'undefined' && sizes.length > 0) { %><% sizes.forEach(size => { %> <label class="cursor-pointer group">
+                  <input type="checkbox" name="sizes" value="
+																	<%= size %>" class="peer hidden" />
+                  <span class="w-12 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-[11px] font-black text-gray-400 border border-gray-100 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-lg transition-all uppercase"><%= size %> </span>
+                </label><% }) %><% } else { %> <p class="text-[10px] text-gray-400 p-2 italic">No sizes defined in database.</p><% } %> </div>
+            </div>
+            <div class="space-y-3">
+              <label class="text-[10px] font-black text-blue-600 uppercase ml-2 block font-bold tracking-widest">Product Images (3–4)</label>
+              <input type="file" name="images" accept="image/*" multiple class="w-full text-xs text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-white cursor-pointer hover:file:bg-blue-600 transition-all" required />
+            </div>
+            <input type="hidden" name="category" value="shoes" />
+          </div>
+          <div class="p-6 border-t border-gray-50 flex gap-4 bg-white flex-shrink-0">
+            <button type="button" class="flex-1 py-4 text-[11px] font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-all" onclick="closeModal('addModal')">Discard</button>
+            <button type="submit" class="flex-[2] py-4 bg-gray-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all">Add Product</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!--=========================================================== Edit Product Modal ===========================================================-->
+  <form id="productEditForm" action="/admin-editshoesproducts" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="productId" id="editProductId" />
+    <div class="modal-overlay hidden fixed inset-0 bg-black/50 z-[9999] items-center justify-center" id="editModal" style="overflow-y: scroll;">
+      <div class="modal-box bg-white w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl m-4" style="position: relative; top: 0;">
+        <div class="flex flex-col max-h-[90vh]">
+          <div class="p-6 md:p-8 border-b border-gray-50 flex-shrink-0">
+            <h2 class="text-2xl md:text-3xl font-black tracking-tighter text-gray-900 uppercase">Edit <span class="text-blue-600">Product</span>
+            </h2>
+            <p class="text-[10px] text-gray-400 font-bold tracking-widest uppercase mt-1">Update your inventory details</p>
+          </div>
+          <div class="p-6 md:p-8 overflow-y-auto custom-scrollbar flex-grow">
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                  <label class="text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Shoe Name</label>
+                  <input type="text" name="title" id="editName" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 transition-all outline-none" required />
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Price (₹)</label>
+                  <input type="number" name="price" id="editPrice" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 transition-all outline-none" required />
+                </div>
+              </div>
+              <div class="flex flex-col">
+                <label class="text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Description</label>
+                <textarea name="description" id="editDescription" rows="3" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none resize-none" required></textarea>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                  <label class="text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Offer (%)</label>
+                  <input type="number" name="offerPercentage" id="editOffer" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-[10px] font-black uppercase text-gray-400 mb-1 ml-1">Total Stock</label>
+                  <input type="number" name="totalStock" id="editStock" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-semibold focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-gray-50 rounded-2xl">
+                <div class="flex flex-col">
+                  <label class="text-[9px] font-black text-gray-400 uppercase">Gender</label>
+                  <select name="gender" id="editGender" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 text-sm py-1 cursor-pointer">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="unisex">Unisex</option>
+                  </select>
+                </div>
+                <div class="flex flex-col border-t sm:border-t-0 sm:border-x border-gray-200 pt-2 sm:pt-0 sm:px-3">
+                  <label class="text-[9px] font-black text-gray-400 uppercase">Brand</label>
+                  <select name="brand" id="editBrand" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 text-sm py-1 cursor-pointer" required>
+                    <option value="" disabled selected>Select a Brand</option><% if (category.brands && category.brands.length > 0) { %><% category.brands.forEach(brand => { %> <option value="<%= brand %>"><%= brand %> </option><% }) %><% } else { %> <option value="" disabled>No brands available</option><% } %>
+                  </select>
+                </div>
+                <div class="flex flex-col border-t sm:border-t-0 pt-2 sm:pt-0 sm:pl-3">
+                  <label class="text-[9px] font-black text-gray-400 uppercase">Status</label>
+                  <select name="status" id="editStatus" class="bg-transparent border-none font-bold text-blue-600 focus:ring-0 text-sm py-1 cursor-pointer">
+                    <option value="active">Show</option>
+                    <option value="inactive">Hide</option>
+                  </select>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase text-gray-400 ml-1">Current Images</label>
+                <div id="editImagePreview" class="flex gap-2 flex-wrap p-3 bg-blue-50/50 rounded-xl border-2 border-dashed border-blue-100 min-h-[50px]"></div>
+                <input type="file" name="images" multiple class="w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white cursor-pointer" />
+              </div>
+              <div>
+                <label class="text-[10px] font-black uppercase text-gray-400 mb-2 block ml-1">Select Sizes</label>
+                <div class="flex flex-wrap gap-2"><% if (typeof sizes !== 'undefined' && sizes.length > 0) { %><% sizes.forEach(size => { %> <label class="flex-1 min-w-[50px]">
+                    <input type="checkbox" name="sizes" value="
+																			<%= size %>" class="peer hidden" />
+                    <span class="flex items-center justify-center py-2 bg-gray-100 rounded-lg text-xs font-bold text-gray-600 peer-checked:bg-blue-600 peer-checked:text-white transition-all cursor-pointer hover:bg-gray-200"><%= size %> </span>
+                  </label><% }) %><% } else { %> <p class="text-[10px] text-gray-400 p-2">No sizes available for this category.</p><% } %> </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-6 md:p-8 border-t border-gray-50 flex gap-3 flex-shrink-0">
+            <button type="button" class="flex-1 py-3 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-red-500 transition-colors" onclick="closeModal('editModal')">Cancel</button>
+            <button type="submit" class="flex-[2] py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg hover:bg-blue-600 transition-all">Update Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <script>
+  function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("active");
+}
+
+function toggleModal() {
+  const modal = document.getElementById("productModal");
+  modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+
+</script>
+
+  <script>
+    // 1. ADD PRODUCT FORM AJAX HANDLING
+    document.getElementById('productAddForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerText = "Adding...";
+        submitBtn.disabled = true;
+        try {
+            const response = await fetch(form.action, { method: 'POST', body: formData });
+            if (response.ok) {
+                alert("Product added successfully!");
+                closeModal('addModal');
+                form.reset();
+                window.location.reload();
+            } else {
+                alert("Error: Something went wrong!");
+            }
+        } catch (err) { console.error(err); } 
+        finally { submitBtn.innerText = "Add Product"; submitBtn.disabled = false; }
+    });
+
+    // 2. EDIT PRODUCT FORM AJAX HANDLING
+    document.getElementById('productEditForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerText = "Updating...";
+        submitBtn.disabled = true;
+        try {
+            const response = await fetch(form.action, { method: 'POST', body: formData });
+            if (response.ok) {
+                alert("Product updated successfully!");
+                closeModal('editModal');
+                window.location.reload();
+            } else {
+                alert("Error updating product!");
+            }
+        } catch (err) { console.error(err); } 
+        finally { submitBtn.innerText = "Update Changes"; submitBtn.disabled = false; }
+    });
+
+    // 3. EDIT MODAL POPULATING FUNCTION
+    function openEditModalFromBtn(button) {
+        const productId = button.getAttribute('data-id');
+        const productDataElement = document.getElementById('product-' + productId);
+        const product = JSON.parse(productDataElement.textContent);
+        document.getElementById('editProductId').value = product._id;
+        document.getElementById('editName').value = product.title;
+        document.getElementById('editPrice').value = product.price;
+        document.getElementById('editDescription').value = product.description;
+        document.getElementById('editOffer').value = product.offerPercentage;
+        document.getElementById('editStock').value = product.totalStock;
+        document.getElementById('editGender').value = product.gender;
+        document.getElementById('editBrand').value = product.brand;
+        document.getElementById('editStatus').value = product.status;
+        const previewDiv = document.getElementById('editImagePreview');
+        previewDiv.innerHTML = '';
+        product.images.forEach(imgUrl => {
+            previewDiv.innerHTML += `<img src="${imgUrl}" class="w-12 h-12 rounded-lg object-cover">`;
+        });
+        const sizeCheckboxes = document.querySelectorAll('input[name="sizes"]');
+        sizeCheckboxes.forEach(cb => {
+            cb.checked = product.sizes.includes(cb.value);
+        });
+        openModal('editModal');
+    }
+
+    // 4. MODAL HELPER FUNCTIONS
+    function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // 5. FILTER SHOES FUNCTION
+    function filterShoes(filterValue) {
+        const tableBody = document.getElementById('productTableBody');
+        if (!tableBody) return;
+        const rows = tableBody.getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const statusCell = row.getElementsByTagName('td')[4];
+            if (!statusCell) continue;
+            const status = statusCell.innerText.trim().toLowerCase();
+            if (filterValue === 'all') row.style.display = "";
+            else if (filterValue === 'show') row.style.display = (status === 'active') ? "" : "none";
+            else if (filterValue === 'hide') row.style.display = (status !== 'active') ? "" : "none";
+        }
+    }
+
+    // 6. SIZE MANAGEMENT (ADD/DELETE)
+    document.getElementById('sizeAddForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId: formData.get('categoryId'), sizeName: formData.get('sizeName') })
+            });
+            if (response.ok) { window.location.reload(); }
+            else { alert("Failed to add size."); }
+        } catch (err) { console.error("Error:", err); }
+    });
+
+    async function deleteSize(categoryId, sizeName) {
+        if (!confirm("Are you sure you want to delete this size?")) return;
+        try {
+            const response = await fetch('/admin-delete-size', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId, sizeName })
+            });
+            if (response.ok) { window.location.reload(); }
+            else { alert("Failed to delete size."); }
+        } catch (err) { console.error(err); }
+    }
+
+    // 7. BRAND MANAGEMENT (DELETE)
+    async function deleteBrand(categoryId, brandName) {
+        if (!confirm(`Are you sure you want to delete ${brandName}?`)) return;
+        try {
+            const response = await fetch('/admin/delete-brand', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ categoryId, brandName })
+            });
+            if (response.ok) { window.location.reload(); }
+            else { alert("Failed to delete brand."); }
+        } catch (err) { console.error(err); }
+    }
+
+
+</script>
+
+  </body>
+  </html>

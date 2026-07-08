@@ -1,179 +1,10 @@
-// exports.getAdminHowManyShoesUploaded = async (req, res, next) => {
-//   try {
-//     // 🔐 admin check
-//     if (!req.session.isLoggedIn || !req.session.user) {
-//       return req.session.destroy(() => res.redirect("/login"));
-//     }
-
-//     const admin = req.session.user;
-
-//     // 🔍 filter from query
-//     const filter = req.query.filter || "all";
-
-//     let findQuery = { category: "shoes" };
-
-//     if (filter === "show") {
-//       findQuery.status = "active";
-//     }
-
-//     if (filter === "hide") {
-//       findQuery.status = "inactive";
-//     }
-
-//     const products = await Product.find(findQuery).sort({ createdAt: -1 });
-
-//     res.render("Admin/adminAllShoesProducts", {
-//       admin,
-//       products,
-//       selectedFilter: filter, // 👈 for select box
-//       isLoggedIn: req.session.isLoggedIn,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Server Error");
-//   }
-// };
-
-// exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
-//   try {
-//     // 🔐 Session + Role Check
-//     if (!req.session.isLoggedIn || !req.session.user) {
-//       return req.session.destroy(() => res.redirect("/login"));
-//     }
-//     const admin = req.session.user;
-//     if (admin.role !== "admin") {
-//       return res.status(403).redirect("/login");
-//     }
-//     const {
-//       title,
-//       price,
-//       offerPercentage,
-//       totalStock,
-//       gender,
-//       brand,
-//       sizes,
-//       category,
-//     } = req.body; // ✅ SAFE OFFER VALUE
-//     const offer = Number(offerPercentage) || 0;
-//     // 🖼 Image validation
-//     if (!req.files || req.files.length < 1) {
-//       return res.status(400).send("Minimum 1 images required");
-//     }
-//     // ☁ Upload to Cloudinary
-//     let imageUrls = [];
-//     for (let file of req.files) {
-//       const result = await cloudinary.uploader.upload(file.path, {
-//         folder: "shoes",
-//       });
-//       imageUrls.push(result.secure_url);
-//     }
-//     // 📦 Sizes (checkbox fix)
-//     let sizeArray = [];
-//     if (Array.isArray(sizes)) {
-//       sizeArray = sizes.map(Number);
-//     } else if (sizes) {
-//       sizeArray = [Number(sizes)];
-//     }
-//     // 🧠 Create Product
-//     const product = new Product({
-//       title,
-//       price,
-//       offerPercentage: offer, // 👈 yahan
-//       totalStock,
-//       gender,
-//       brand,
-//       category,
-//       sizes: sizeArray,
-//       images: imageUrls,
-//       createdBy: admin._id,
-//     });
-//     await product.save();
-//     console.log("✅ Shoe added successfully");
-//     res.redirect("/admin-howmanyshoesuploaded"); // change as needed
-//   } catch (err) {
-//     console.error("❌ Add Shoe Error:", err);
-//     res.status(500).send("Something went wrong");
-//   }
-// };
-
-// exports.postAdminShoesEditProducts = async (req, res, next) => {
-//   try {
-//     // 🔐 LOGIN + ROLE CHECK
-//     if (!req.session.isLoggedIn || !req.session.user) {
-//       return req.session.destroy(() => res.redirect("/login"));
-//     }
-
-//     if (req.session.user.role !== "admin") {
-//       return res.status(403).redirect("/login");
-//     }
-
-//     const {
-//       productId,
-//       title,
-//       price,
-//       offerPercentage,
-//       totalStock,
-//       gender,
-//       brand,
-//       status,
-//       sizes,
-//     } = req.body;
-
-//     // 🧠 PRODUCT FIND
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       return res.status(404).send("Product not found");
-//     }
-
-//     // 👟 SIZES FIX
-//     let sizeArray = [];
-//     if (Array.isArray(sizes)) {
-//       sizeArray = sizes.map(Number);
-//     } else if (sizes) {
-//       sizeArray = [Number(sizes)];
-//     }
-
-//     // ✏ UPDATE BASIC FIELDS
-//     product.title = title;
-//     product.price = price;
-//     product.offerPercentage = offerPercentage || 0;
-//     product.totalStock = totalStock;
-//     product.gender = gender;
-//     product.brand = brand;
-//     product.status = status;
-//     product.sizes = sizeArray;
-
-//     // 🖼 IMAGE UPDATE (OPTIONAL)
-//     if (req.files && req.files.length > 0) {
-//       let imageUrls = [];
-
-//       for (let file of req.files) {
-//         const result = await cloudinary.uploader.upload(file.path, {
-//           folder: "shoes",
-//         });
-//         imageUrls.push(result.secure_url);
-//       }
-
-//       product.images = imageUrls; // 🔥 replace old images
-//     }
-//     // else → keep old images automatically
-
-//     await product.save(); // offerPrice auto recalculated
-
-//     console.log("✅ Shoes updated:", product.title);
-
-//     return res.redirect("/admin-howmanyshoesuploaded");
-//   } catch (err) {
-//     console.error("❌ Edit Shoe Error:", err);
-//     res.status(500).send("Update failed");
-//   }
-// };
 
 const User = require("../model/userSchema");
 const Product = require("../model/productSchema");
 const Order = require("../model/orderSchema");
-// const cloudinary = require("../utils/cloudinary");
 const uploadToPhpServer = require("../utils/uploadToPhpServer");
+const Category = require('../model/categorySchema');
+
 exports.getAdminHome = async (req, res, next) => {
   try {
     // 1️⃣ Login check
@@ -204,6 +35,24 @@ exports.getAdminHome = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// Admin Categories View - Data fetch karne ke liye
+exports.getAdminCategory = async (req, res) => {
+    try {
+        const categories = await Category.find({}).lean();
+        console.log("DEBUG: Category list length:", categories.length); 
+        
+        res.render('Admin/admin-category', { 
+            admin: req.session.admin || { username: 'Admin' }, 
+            categories: categories 
+        });
+    } catch (err) {
+        console.error("Error in getAdminCategory:", err);
+        res.status(500).send("Error loading categories");
+    }
+};
+
 
 exports.getAdminUsersList = async (req, res, next) => {
   try {
@@ -245,30 +94,20 @@ exports.getAdminHowManyShoesUploaded = async (req, res, next) => {
 
     const admin = req.session.user;
 
-    // 🔒 ROLE CHECK (important)
+    // 🔒 ROLE CHECK
     if (admin.role !== "admin") {
       return res.status(403).redirect("/login");
     }
 
-    // 🔍 FILTER FROM QUERY
-    const filter = req.query.filter || "all";
-
-    let findQuery = { category: "shoes" };
-
-    if (filter === "show") {
-      findQuery.status = "active";
-    } else if (filter === "hide") {
-      findQuery.status = "inactive";
-    }
-
-    // 📦 FETCH PRODUCTS
-    const products = await Product.find(findQuery).sort({ createdAt: -1 });
+    // 🔍 FETCH ALL PRODUCTS (Bina filter ke, taaki frontend filter kaam kare)
+    // Humne findQuery ko simple rakha hai taaki sabhi products browser mein aayein
+    const products = await Product.find({ category: "shoes" }).sort({ createdAt: -1 });
 
     // 🖥 RENDER
     res.render("Admin/adminAllShoesProducts", {
       admin,
       products,
-      selectedFilter: filter,
+      selectedFilter: req.query.filter || "all", // Sirf initial state ke liye
       isLoggedIn: req.session.isLoggedIn,
     });
   } catch (err) {
@@ -276,7 +115,6 @@ exports.getAdminHowManyShoesUploaded = async (req, res, next) => {
     res.status(500).send("Server Error");
   }
 };
-
 exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
   try {
     // 🔐 SESSION + ROLE CHECK
@@ -289,10 +127,13 @@ exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
       return res.status(403).redirect("/login");
     }
 
+    // 🔍 Capture filter from the form (Hidden input se aayega)
+    const filterFromForm = req.body.filter || "all";
+
     const {
       title,
       price,
-      description, // 👈 ADD
+      description,
       offerPercentage,
       totalStock,
       gender,
@@ -310,7 +151,6 @@ exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
 
     // 🚀 UPLOAD TO PHP SERVER
     let imageUrls = [];
-
     for (let file of req.files) {
       const url = await uploadToPhpServer(file.path);
       imageUrls.push(url);
@@ -328,7 +168,7 @@ exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
     const product = new Product({
       title,
       price,
-      description, // 👈 ADD
+      description,
       offerPercentage: offer,
       totalStock,
       gender,
@@ -342,13 +182,14 @@ exports.postAdminHowManyShoesProductUploaded = async (req, res, next) => {
     await product.save();
 
     console.log("✅ Shoe added (PHP Upload)");
-    res.redirect("/admin-howmanyshoesuploaded");
+    
+    // 🔄 REDIRECT WITH FILTER
+    res.redirect(`/admin-howmanyshoesuploaded?filter=${filterFromForm}`);
   } catch (err) {
     console.error("❌ Add Shoe Error:", err);
     res.status(500).send("Something went wrong");
   }
 };
-
 exports.postAdminShoesEditProducts = async (req, res, next) => {
   try {
     // 🔐 LOGIN + ROLE CHECK
@@ -1974,4 +1815,180 @@ exports.getTotalSales = async (req, res) => {
     console.error("Total Sales Error:", err);
     res.status(500).send("Something went wrong");
   }
+};
+
+
+
+// Add Category logic - Data save karne ke liye
+// Add Category logic - Updated for PHP Upload
+exports.postAddCategory = async (req, res) => {
+    try {
+        const { categoryName } = req.body;
+        
+        if (!categoryName) {
+            return res.status(400).send("Category name is required.");
+        }
+        
+        if (!req.file) {
+            return res.status(400).send("Category image is required.");
+        }
+
+        // ✅ FIXED: PHP Server par upload karein aur URL prapt karein
+        // req.file.path aapki local temporary file ka path hai
+        const imageUrl = await uploadToPhpServer(req.file.path);
+        
+        console.log("DEBUG: PHP Server returned URL:", imageUrl);
+
+        // Duplicate check
+        const existingCategory = await Category.findOne({ name: { $regex: new RegExp(`^${categoryName}$`, 'i') } });
+        if (existingCategory) {
+            return res.status(400).send("Category already exists!");
+        }
+
+        // Create and Save
+        const newCategory = new Category({
+            name: categoryName.trim(), 
+            imageUrl: imageUrl // Yahan ab https://24carret.in/... wala link save hoga
+        });
+        
+        await newCategory.save();
+        
+        console.log("SUCCESS: Category saved with URL:", imageUrl);
+        
+        res.redirect('/admin-category');
+
+    } catch (err) {
+        console.error("SAVE ERROR:", err);
+        res.status(500).send("Internal Server Error: " + err.message);
+    }
+};
+
+
+exports.deleteCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Category.findByIdAndDelete(id);
+        console.log("SUCCESS: Category deleted:", id);
+        res.redirect('/admin-category');
+    } catch (err) {
+        console.error("DELETE ERROR:", err);
+        res.status(500).send("Error deleting category");
+    }
+};
+
+exports.getCategoryPage = async (req, res) => {
+    try {
+        const categoryName = req.params.name;
+        
+        // 1. Category find karein (Case-insensitive)
+        const category = await Category.findOne({ 
+            name: { $regex: new RegExp(`^${categoryName}$`, 'i') } 
+        });
+
+        if (!category) {
+            return res.status(404).send("Category not found");
+        }
+
+        // 2. Us category se related products fetch karein
+        const products = await Product.find({ 
+            category: { $regex: new RegExp(`^${category.name}$`, 'i') } 
+        });
+
+        // 3. Render ke saath category, products, brands, aur sizes pass karein
+        res.render('Admin/category-details', { 
+            admin: req.session.admin || { username: 'Admin' },
+            category: category,
+            products: products,
+            brands: category.brands || [], // Brands pass kiye
+            sizes: category.sizes || []   // Sizes pass kiye taaki error khatam ho jaye
+        });
+    } catch (err) {
+        console.error("Error loading category page:", err);
+        res.status(500).send("Server Error");
+    }
+};
+
+
+exports.addBrandToCategory = async (req, res) => {
+    try {
+        const { categoryId, categoryName, brandName } = req.body;
+        
+        // Database mein brand push karein
+        await Category.findByIdAndUpdate(categoryId, { 
+            $push: { brands: brandName } 
+        });
+
+        console.log(`Brand '${brandName}' added to ${categoryName}`);
+        
+        // Wapas usi category page par redirect karein
+        res.redirect(`/admin/category/${categoryName}`);
+    } catch (err) {
+        console.error("Error adding brand:", err);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
+exports.getCategoryProducts = async (req, res) => {
+    const category = req.params.categoryName; // e.g., 'shoes', 'shirts', 'watches'
+    const products = await Product.find({ category: category }).sort({ createdAt: -1 });
+
+    res.render("Admin/categoryProducts", {
+        products,
+        categoryName: category,
+        admin: req.session.user
+    });
+};
+
+
+exports.addSize = async (req, res) => {
+    try {
+        const { categoryId, sizeName } = req.body;
+
+        // Validation: Check karein ki input khali toh nahi
+        if (!sizeName) return res.status(400).send("Size name is required");
+
+        // Category mein size push karein
+        const updatedCategory = await Category.findByIdAndUpdate(
+            categoryId,
+            { $addToSet: { sizes: sizeName } }, // $addToSet duplicate entry rokta hai
+            { new: true }
+        );
+
+        if (!updatedCategory) return res.status(404).send("Category not found");
+
+        res.status(200).json({ success: true, message: "Size added!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+};
+
+
+exports.deleteSize = async (req, res) => {
+    try {
+        const { categoryId, sizeName } = req.body;
+        // $pull operator array se specific item nikal deta hai
+        await Category.findByIdAndUpdate(categoryId, { 
+            $pull: { sizes: sizeName } 
+        });
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(500).send("Server Error");
+    }
+};
+
+exports.deleteBrand = async (req, res) => {
+    try {
+        const { categoryId, brandName } = req.body;
+        
+        await Category.findByIdAndUpdate(categoryId, { 
+            $pull: { brands: brandName } 
+        });
+        
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
 };

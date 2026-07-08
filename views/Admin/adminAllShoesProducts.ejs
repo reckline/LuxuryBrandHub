@@ -67,59 +67,6 @@
         </button>
       </header>
 
-      <!-- <div class="product-grid">
-        <% products.forEach(product=> { %>
-          <div class="product-card">
-            <img src="<%= product.images[0] %>" class="product-img" />
-
-            <div class="product-info">
-              <h3 class="shoe-name">
-                <%= product.title %>
-              </h3>
-              <p style="color:gray; font-size:13px;">
-                <%= product.description %>
-              </p>
-              <p class="shoe-price">₹<%= product.price %>
-              </p>
-
-              <% if(product.offerPercentage> 0){ %>
-                <p class="shoe-offer" style="color:red;">
-                  Offer <%= product.offerPercentage %>%
-                </p>
-                <p class="shoe-offer-price" style="color:green;">
-                  Offer Price ₹<%= product.offerPrice %>
-                </p>
-                <% } %>
-
-                  <p class="shoe-stock" style="color:red;">
-                    Total Stock <%= product.totalStock %>
-                  </p>
-
-                  <p style="color:blue;">
-                    <%= product.gender %>
-                  </p>
-                  <p style="color:blue;">
-                    <%= product.brand %>
-                  </p>
-                  <p style="color:blue;">
-                    <%= product.sizes.join(", ") %></p>
-
-                   <p style=" color:goldenrod;">
-                      <%= product.status==="active" ? "Show" : "Hide" %>
-                  </p>
-
-                  <button class="btn-edit" data-id="<%= product._id %>" onclick="openEditModalFromBtn(this)">
-                    Edit Product
-                  </button>
-
-                  <script type="application/json" id="product-<%= product._id %>">
-                   <%- JSON.stringify(product) %>
-                  </script>
-            </div>
-          </div>
-          <% }) %>
-      </div> -->
-
       <div class="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-8 bg-gray-50">
   <% products.forEach(product => { %>
     <div class="product-card group relative bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden flex flex-col h-full">

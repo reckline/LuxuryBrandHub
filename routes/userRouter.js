@@ -3,29 +3,33 @@ const userRouter = express.Router();
 const userController = require('../controller/userController');
 const upload = require("../utils/multer");
 
-// Models import (Folder structure 'model' singular hai)
+// Models import
 const Category = require('../model/categorySchema'); 
 const Product = require('../model/productSchema'); 
 
-// Updated Home Route: Path fix karke 'user/home' kar diya gaya hai
+// Updated Home Route with robust error handling
 userRouter.get('/', async (req, res, next) => {
     try {
-        const categories = await Category.find({});
-        const brands = await Product.distinct("brand"); 
+        // Lean() use kiya hai taaki performance fast ho (Live server ke liye best hai)
+        const categories = await Category.find({}).lean();
         
-        // Path fix: 'index' ki jagah 'user/home'
+        // Agar database se data nahi mil raha, toh empty array bhejo, crash mat hone do
+        const brands = await Product.distinct("brand").catch(() => []); 
+        
         res.render('user/home', { 
-            categories, 
-            brands,
-            isLoggedIn: req.session.isLoggedIn || false,
-            user: req.session.user || null 
+            categories: categories || [], 
+            brands: brands || [],
+            isLoggedIn: req.session?.isLoggedIn || false,
+            user: req.session?.user || null 
         });
     } catch (error) {
+        console.error("Home Route Error:", error);
+        // Error aane par 500 render karne ki jagah next(error) karo
         next(error);
     }
 });
 
-// Baki routes waisa hi hain
+// Baki routes waise hi hain
 userRouter.get('/luxuryBoysWatches', userController.getLuxuryBoysWatches);
 userRouter.get('/luxuryGirlsWatches', userController.getLuxuryGirlsWatches);
 userRouter.get('/allgoogles', userController.getAllGoogles);

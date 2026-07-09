@@ -1,14 +1,46 @@
-<body class="bg-gray-50 flex font-sans">
-
-<aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r shadow-xl z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
-    <div class="p-6 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-brand-dark">Rider Shoes</h1>
-        <button onclick="toggleSidebar()" class="lg:hidden"><i class="fas fa-times text-2xl"></i></button>
+<aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 shadow-2xl z-50 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+    <div class="p-6 flex justify-between items-center bg-gradient-to-r from-purple-600 to-indigo-600">
+        <h1 class="text-xl font-bold text-white">Rider Shoes</h1>
+        <button onclick="toggleSidebar()" class="lg:hidden text-white"><i class="fas fa-times text-2xl"></i></button>
     </div>
-    <nav class="mt-4 px-4 space-y-2">
-        <a href="/" class="flex items-center px-4 py-3 bg-purple-50 text-brand-dark rounded-xl font-bold"><i class="fas fa-home mr-3"></i> Home</a>
-        <a href="/luxuryBoysWatches" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-xl transition"><i class="fas fa-clock mr-3"></i> Boys Watches</a>
-        <a href="/nike" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-xl transition"><i class="fas fa-shoe-prints mr-3"></i> Shoes</a>
-        <a href="aboutus.html" class="flex items-center px-4 py-3 hover:bg-gray-100 rounded-xl transition"><i class="fas fa-info-circle mr-3"></i> About Us</a>
+    
+    <nav class="mt-4 px-4 space-y-8">
+        <div>
+            <h2 class="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Menu</h2>
+            <a href="/" class="flex items-center px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-bold transition-all hover:bg-indigo-100">
+                <i class="fas fa-home mr-3"></i> Home
+            </a>
+        </div>
+
+        <div>
+            <h2 class="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Shop By Brand</h2>
+            <div class="space-y-1">
+                <% if (typeof brands !== 'undefined' && brands.length > 0) { %>
+                    <% brands.forEach(brand => { %>
+                        <a href="/brand/<%= brand %>" class="flex items-center px-4 py-2.5 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition-all text-sm font-medium">
+                            <i class="fas fa-chevron-right mr-3 text-[10px] opacity-50"></i> <%= brand %>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <p class="px-4 text-xs text-gray-400 italic">No brands found</p>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+            <h2 class="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Account</h2>
+            <div class="space-y-1">
+                <a href="/profile" class="flex items-center px-4 py-2.5 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition text-sm font-medium">
+                    <i class="fas fa-user mr-3"></i> Profile
+                </a>
+                <a href="/order-history" class="flex items-center px-4 py-2.5 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition text-sm font-medium">
+                    <i class="fas fa-shopping-bag mr-3"></i> Orders
+                </a>
+                <a href="/wishlist" class="flex items-center px-4 py-2.5 text-gray-600 hover:text-indigo-600 hover:bg-gray-50 rounded-lg transition text-sm font-medium">
+                    <i class="fas fa-heart mr-3"></i> Wishlist
+                </a>
+               <a href="/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-semibold"><i class="fa-solid fa-arrow-right-from-bracket w-8"></i> Logout</a>
+            </div>
+        </div>
     </nav>
 </aside>

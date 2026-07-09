@@ -71,7 +71,7 @@
               </span>
             </div>
 
-            <a href="/product/<%= product._id %>" style="text-decoration: none;">
+            <a href="/view-product/<%= product._id %>" style="text-decoration: none;">
               <button class="add-to-cart-btn">
                 <i class="fa-solid fa-bag-shopping"></i>
                 View Product
@@ -97,22 +97,43 @@
             <% } %> <% const
             isInCart=cartProductIds.includes(product._id.toString()); %>
 
-            <button
+            <!-- <button
               class="add-to-cart-btn cart"
               data-incart="<%= isInCart ? 'true' : 'false' %>"
               onclick="toggleWishlistCart(this, '<%= product._id %>')"
             >
               <i class="fa-solid fa-cart-plus"></i>
               <span><%= isInCart ? "✔ Added" : "Add to Cart" %></span>
-            </button>
+            </button> -->
           </div>
         </div>
         <% }) %>
       </div>
     </div>
-    <script src="/js/buynow.js"></script>
-    <script src="/js/heart.js"></script>
-    <script src="/js/cart.js"></script>
+<script>
+async function toggleFav(button, productId) {
+    try {
+        const response = await fetch('/wishlist/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId: productId })
+        });
+
+        const data = await response.json();
+        console.log("Server response:", data); // Isse console mein check karo ki kya aa raha hai
+
+        if (data && data.success) {
+            const card = button.closest('.product-card');
+            if (card) card.remove();
+        } else {
+            // Agar data.message undefined hai, toh fallback text dikhao
+            alert(data.message || "Done");
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+    }
+}
+</script>
     <!-- ♻️ SAME WISHLIST JS -->
   </body>
 </html>

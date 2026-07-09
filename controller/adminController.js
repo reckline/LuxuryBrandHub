@@ -2223,17 +2223,56 @@ exports.getAdminNewOrders = async (req, res) => {
     res.render("Admin/admin-neworder", { orders, isLoggedIn: req.session.isLoggedIn, admin: req.session.user });
   } catch (err) { res.status(500).send("Error loading orders"); }
 };
-
 exports.postAdminUpdateOrderStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
+    
+    // Debugging: Check karo kya aa raha hai
+    console.log("Updating Order ID:", orderId, "to Status:", status);
+
     const order = await Order.findById(orderId);
-    if (status === "Cancelled") { order.orderStatus = "Cancelled"; order.cancelled = { isCancelled: true, cancelledAt: new Date(), cancelledBy: "admin" }; }
-    if (status === "Delivered") { order.orderStatus = "Delivered"; order.paymentStatus = "Paid"; await User.findByIdAndUpdate(order.user, { $inc: { totalSpend: order.totalAmount, totalOrders: 1 } }); }
+    if (!order) {
+        console.error("Order not found in DB:", orderId);
+        return res.status(404).send("Order not found");
+    }
+
+    // Status Update Logic
+    if (status === "Cancelled") { 
+        order.orderStatus = "Cancelled"; 
+        order.cancelled = { 
+            isCancelled: true, 
+            cancelledAt: new Date(), 
+            cancelledBy: "admin" 
+        }; 
+    } else if (status === "Delivered") { 
+        order.orderStatus = "Delivered"; 
+        order.paymentStatus = "Paid"; 
+        
+        await User.findByIdAndUpdate(order.user, { 
+            $inc: { 
+                totalSpend: order.totalAmount || 0, // Ensure number hai
+                totalOrders: 1 
+            } 
+        }); 
+    } else {
+        // Agar koi aur status ho toh direct update karo
+        order.orderStatus = status;
+    }
+
+    // Save changes
     await order.save();
-    res.redirect("/admin-newoder");
-  } catch (err) { res.status(500).send("Status update failed"); }
+    console.log("Order updated successfully in DB");
+    
+    // Redirect path match karo (kya ye /admin-newoder hai ya /admin/newoder?)
+    res.redirect("admin/newoder"); 
+    
+  } catch (err) { 
+    console.error("Status update error:", err);
+    res.status(500).send("Status update failed: " + err.message); 
+  }
 };
+
+// ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
 
 exports.getAdminOrderHistory = async (req, res) => {
   try {
@@ -2452,3 +2491,4 @@ exports.deleteBrand = async (req, res) => {
         res.status(500).json({ success: false, message: "Error deleting brand" }); 
     }
 };
+

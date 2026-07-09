@@ -49,6 +49,9 @@ adminRouter.post('/delete-size', isAuthenticated, adminController.deleteSize);
 // --- DYNAMIC PRODUCT ROUTES ---
 adminRouter.get('/products/:categoryName', isAuthenticated, adminController.getCategoryProducts);
 
+adminRouter.post('/admin-update-order-status', adminController.postAdminUpdateOrderStatus);
+
+
 // 2. Add Product (Universal)
 adminRouter.post(
   "/products/add",

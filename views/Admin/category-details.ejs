@@ -219,9 +219,19 @@
               </div>
               <div class="flex flex-col text-center border-l border-gray-200">
                 <label class="text-[9px] font-black text-gray-400 uppercase mb-1">Brand</label>
-                <select name="brand" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer" required>
-                  <option value="" disabled selected>Select a Brand</option><% if (category.brands && category.brands.length > 0) { %><% category.brands.forEach(brand => { %> <option value="<%= brand %>"><%= brand %> </option><% }) %><% } else { %> <option value="" disabled>No brands available</option><% } %>
-                </select>
+<select name="brand" class="bg-transparent border-none font-bold text-gray-900 text-xs focus:ring-0 outline-none cursor-pointer" required>
+  <option value="" disabled selected>Select a Brand</option>
+  
+  <% if (category.brands && category.brands.length > 0) { %>
+    <% category.brands.forEach(brand => { %>
+      <% const brandName = (typeof brand === 'object' && brand !== null) ? brand.name : brand; %>
+      
+      <option value="<%= brandName %>"><%= brandName %></option>
+    <% }) %>
+  <% } else { %>
+    <option value="" disabled>No brands available</option>
+  <% } %>
+</select>
               </div>
             </div>
             <div class="space-y-3">
@@ -296,9 +306,21 @@
                 </div>
                 <div class="flex flex-col border-t sm:border-t-0 sm:border-x border-gray-200 pt-2 sm:pt-0 sm:px-3">
                   <label class="text-[9px] font-black text-gray-400 uppercase">Brand</label>
-                  <select name="brand" id="editBrand" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 text-sm py-1 cursor-pointer" required>
-                    <option value="" disabled selected>Select a Brand</option><% if (category.brands && category.brands.length > 0) { %><% category.brands.forEach(brand => { %> <option value="<%= brand %>"><%= brand %> </option><% }) %><% } else { %> <option value="" disabled>No brands available</option><% } %>
-                  </select>
+<select name="brand" id="editBrand" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 text-sm py-1 cursor-pointer" required>
+  <option value="" disabled selected>Select a Brand</option>
+  
+  <% if (category.brands && category.brands.length > 0) { %>
+    <% category.brands.forEach(brand => { %>
+      <% 
+        // Logic: Agar brand object hai toh uska 'name' nikal lo, warna string use karo
+        const brandName = (typeof brand === 'object' && brand !== null) ? brand.name : brand; 
+      %>
+      <option value="<%= brandName %>"><%= brandName %></option>
+    <% }) %>
+  <% } else { %>
+    <option value="" disabled>No brands available</option>
+  <% } %>
+</select>
                 </div>
                 <div class="flex flex-col border-t sm:border-t-0 pt-2 sm:pt-0 sm:pl-3">
                   <label class="text-[9px] font-black text-gray-400 uppercase">Status</label>

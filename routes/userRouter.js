@@ -1,14 +1,35 @@
 const express = require('express');
 const userRouter = express.Router();
 const userController = require('../controller/userController');
-const upload = require("../utils/multer"); // your multer config
+const upload = require("../utils/multer");
 
-userRouter.get('/', userController.getHome);
+// Models import (Folder structure 'model' singular hai)
+const Category = require('../model/categorySchema'); 
+const Product = require('../model/productSchema'); 
+
+// Updated Home Route: Path fix karke 'user/home' kar diya gaya hai
+userRouter.get('/', async (req, res, next) => {
+    try {
+        const categories = await Category.find({});
+        const brands = await Product.distinct("brand"); 
+        
+        // Path fix: 'index' ki jagah 'user/home'
+        res.render('user/home', { 
+            categories, 
+            brands,
+            isLoggedIn: req.session.isLoggedIn || false,
+            user: req.session.user || null 
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Baki routes waisa hi hain
 userRouter.get('/luxuryBoysWatches', userController.getLuxuryBoysWatches);
 userRouter.get('/luxuryGirlsWatches', userController.getLuxuryGirlsWatches);
 userRouter.get('/allgoogles', userController.getAllGoogles);
 userRouter.get('/luxuryladishsbags', userController.getAllLuxuryLadiesBags);
-
 
 userRouter.get('/adidas', userController.getAdidasProducts);
 userRouter.get('/asics', userController.getAsicsProducts);
@@ -33,14 +54,11 @@ userRouter.get('/product/:id', userController.getViewProduct);
 userRouter.get("/order-success/:id", userController.getOrderSuccess);
 userRouter.post('/buy-now', userController.postBuyNowOrder);
 userRouter.get('/order-history', userController.getOrderHistory);
-// routes/user.js
+
 userRouter.post("/cart/update-qty", userController.updateCartQty);
 userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
-
-
 userRouter.post("/order/cancel", userController.cancelOrder);
-
 
 // GET PROFILE
 userRouter.get("/profile", userController.getProfile);

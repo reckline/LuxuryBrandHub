@@ -1,105 +1,55 @@
 <% if(isLoggedIn) { %>
-    <nav class="fixed w-full z-50 glass shadow-sm top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="fixed w-full z-50 glass shadow-sm top-0 bg-white/80 backdrop-blur-md">
+        <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-
-                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center text-white overflow-hidden">
-                        <a href="/"> <img src="/images/logo.png" alt="Rider Shoe Logo"
-                                class="object-contain w-full h-full"></a>
-                    </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-xl"><i class="fas fa-bars"></i></button>
+                    <a href="/" class="w-12 h-12 md:w-16 md:h-16 overflow-hidden flex-shrink-0">
+                        <img src="/images/logo.png" alt="Rider Shoe Logo" class="object-contain w-full h-full">
+                    </a>
                 </div>
 
-                <div class="flex items-center space-x-4 sm:space-x-6 text-brand-dark">
-
-                    <i
-                        class="fa-solid fa-magnifying-glass cursor-pointer hover:text-brand-accent transition text-lg hidden sm:block"></i>
-
-                    <a href="/wishlist">
-                        <div>
-                            <i
-                                class="fa-regular fa-heart cursor-pointer hover:text-brand-accent transition text-lg"></i>
-                        </div>
-                    </a>
-
-                    <!-- <a href="/add-to-cart">
-                        <div class="relative cursor-pointer hover:text-brand-accent transition">
-                            <i class="fa-solid fa-bag-shopping text-xl"></i>
-                            <span
-                                class="absolute -top-2 -right-2 bg-brand-accent text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm"></span>
-                        </div>
-                    </a> -->
-
+                <div class="flex items-center gap-3 sm:gap-6 text-brand-dark">
+                    <i class="fa-solid fa-magnifying-glass cursor-pointer hover:text-brand-accent transition text-lg hidden sm:block"></i>
+                    <a href="/wishlist"><i class="fa-regular fa-heart cursor-pointer hover:text-brand-accent transition text-lg"></i></a>
+                    
                     <div class="relative group">
-                        <div
-                            class="flex items-center gap-2 cursor-pointer bg-brand-light/30 px-3 py-2 rounded-full hover:bg-brand-light/60 transition border border-transparent hover:border-brand-light">
-                            <i class="fa-solid fa-bars text-lg"></i>
-                            <i class="fa-solid fa-circle-user text-xl"></i>
+                        <div class="flex items-center gap-2 cursor-pointer bg-brand-light/30 px-3 py-2 rounded-full hover:bg-brand-light/60 transition border border-transparent">
+                            <i class="fa-solid fa-bars text-sm hidden sm:block"></i>
+                            <i class="fa-solid fa-circle-user text-2xl"></i>
                         </div>
-
-                        <div
-                            class="absolute right-0 mt-2 w-64 bg-white/95 backdrop-blur-xl border border-brand-light rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-1 z-50 overflow-hidden">
+                        <div class="absolute right-0 mt-2 w-56 sm:w-64 bg-white/95 backdrop-blur-xl border border-brand-light rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                             <div class="px-4 py-3 bg-brand-light/20 border-b border-brand-light">
-                                <p class="text-xs font-semibold text-brand-accent uppercase tracking-wider">Welcome Back
-                                </p>
+                                <p class="text-[10px] font-bold text-brand-accent uppercase">Welcome Back</p>
                                 <p class="text-sm font-bold text-brand-dark truncate"><%- user.username %></p>
                             </div>
-
                             <div class="py-2">
-                                <a href="/profile"
-                                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand-light/50 transition">
-                                    <i class="fa-solid fa-id-card w-8 text-brand-default text-lg"></i>
-                                    <span>My Profile</span>
-                                </a>
-
-                                <a href="/order-history"
-                                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand-light/50 transition">
-                                    <i class="fa-solid fa-clock-rotate-left w-8 text-brand-default text-lg"></i>
-                                    <div>
-                                        <span class="block">Order History</span>
-                                        <span class="text-[10px] text-gray-400 block -mt-1">View past purchases</span>
-                                    </div>
-                                </a>
-
-                                <!-- <a href="tracking.html"
-                                    class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-brand-light/50 transition">
-                                    <i class="fa-solid fa-truck-fast w-8 text-brand-default text-lg"></i>
-                                    <span>Track My Order</span>
-                                </a> -->
-
+                                <a href="/profile" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-light/50"><i class="fa-solid fa-id-card w-8 text-brand-default"></i> My Profile</a>
+                                <a href="/order-history" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-brand-light/50"><i class="fa-solid fa-clock-rotate-left w-8 text-brand-default"></i> Orders</a>
                                 <hr class="border-brand-light my-1 mx-4">
-
-                                <a href="/logout"
-                                    class="flex items-center px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition font-semibold">
-                                    <i class="fa-solid fa-arrow-right-from-bracket w-8 text-lg"></i>
-                                    <span>Logout</span>
-                                </a>
+                                <a href="/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 font-semibold"><i class="fa-solid fa-arrow-right-from-bracket w-8"></i> Logout</a>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </nav>
-    <% } else { %>
-        <nav class="fixed w-full z-50 glass shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
-                    <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
-
-                        <div class="w-20 h-20 rounded-full  flex items-center justify-center text-white">
-                            <img src="/images/logo.png" alt="">
-                        </div>
-
-                    </div>
-                    <div>
-                        <a href="/login"><button
-                                class="px-6 py-3 bg-brand-dark text-white rounded-full font-semibold hover:bg-brand-accent transition">Login</button></a>
-                        <a href="/signup"><button
-                                class="px-6 py-3 bg-brand-dark text-white rounded-full font-semibold hover:bg-brand-accent transition">Signin</button></a>
+<% } else { %>
+    <nav class="fixed w-full z-50 glass shadow-sm bg-white/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleSidebar()" class="text-xl"><i class="fas fa-bars"></i></button>
+                    <div class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
+                        <img src="/images/logo.png" alt="Logo" class="object-contain w-full h-full">
                     </div>
                 </div>
+                <div class="flex gap-2 sm:gap-4">
+                    <a href="/login"><button class="px-4 sm:px-6 py-2 sm:py-3 bg-brand-dark text-white rounded-full text-xs sm:text-sm font-semibold hover:bg-brand-accent transition">Login</button></a>
+                    <a href="/signup"><button class="px-4 sm:px-6 py-2 sm:py-3 bg-brand-dark text-white rounded-full text-xs sm:text-sm font-semibold hover:bg-brand-accent transition">Signup</button></a>
+                </div>
             </div>
-        </nav>
-        <% } %>
+        </div>
+    </nav>
+<% } %>

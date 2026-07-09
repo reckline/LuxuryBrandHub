@@ -26,7 +26,7 @@ app.set("views", [
     path.join(rootDir, "views"),
     path.join(rootDir, "views", "User"),
     path.join(rootDir, "views", "Admin"),
-    path.join(rootDir, "views", "UserLoginSignup") 
+    path.join(rootDir, "views", "userLoginSignup") 
 ]);
 
 console.log("✅ Views directories set for automatic lookup");

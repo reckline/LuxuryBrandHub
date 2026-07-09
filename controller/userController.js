@@ -1,7 +1,9 @@
+const Category = require('../model/categorySchema'); 
+const Product = require('../model/productSchema');
 const User = require("../model/userSchema");
-const Product = require("../model/productSchema");
 const Order = require("../model/orderSchema");
 const uploadToPhpServer = require("../utils/uploadToPhpServer");
+
 exports.getHome = async (req, res, next) => {
   try {
     // 1️⃣ Not logged in
@@ -1769,3 +1771,50 @@ exports.getNikeProducts = async (req, res, next) => {
     next(error);
   }
 }
+
+
+// =====================================================================================================================
+
+exports.getCategoryProducts = async (req, res, next) => {
+    try {
+        const categorySlug = req.params.categoryName; 
+        
+        // Database mein category search
+        const category = await Category.findOne({ 
+            name: { $regex: new RegExp('^' + categorySlug + '$', 'i') } 
+        });
+
+        if (!category) {
+            return res.render('User/404', { pageTitle: "Category Not Found" });
+        }
+
+        // Us category ke products find karo (Purana logic)
+        const products = await Product.find({ category: category._id });
+
+        // BRAND LOGIC: Unique brands nikalna aur unki image set karna
+        const uniqueBrands = [...new Set(products.map(p => p.brand))];
+        
+        const brandData = uniqueBrands.map(brandName => {
+            const productWithImage = products.find(p => p.brand === brandName);
+            return { 
+                name: brandName, 
+                imageUrl: (productWithImage && productWithImage.imageUrl) ? productWithImage.imageUrl : '/images/placeholder.jpg' 
+            };
+        });
+
+        // NAYA BRAND LOGIC: Database ke 'brands' array se data nikalna
+        // Agar database mein 'brands' field hai, toh usse brandData mein merge/overwrite karo
+        const dbBrands = (category.brands && category.brands.length > 0) 
+            ? category.brands.map(b => ({ name: b.name, imageUrl: b.image })) 
+            : brandData;
+
+        // Ab view ko updated brandData bhej rahe hain
+        res.render('User/category-page', { 
+            products: products, 
+            categoryName: category.name,
+            brandData: dbBrands // Ab ye tumhare DB wale brands array ko use karega
+        });
+    } catch (error) {
+        next(error);
+    }
+};

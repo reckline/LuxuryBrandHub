@@ -13,5 +13,18 @@
     <script>
         tailwind.config = { theme: { extend: { colors: { brand: { light: '#F3E8FF', DEFAULT: '#C084FC', dark: '#6B21A8', accent: '#A855F7' } } } } }
     </script>
+
+
+<style>
+  /* Custom animation for the border moving effect */
+  @keyframes gradient-x {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient-x {
+    animation: gradient-x 3s ease infinite;
+  }
+</style>
     
 </head>

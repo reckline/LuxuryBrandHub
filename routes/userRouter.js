@@ -50,6 +50,8 @@ userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
 userRouter.post("/order/cancel", userController.cancelOrder);
 
+userRouter.get('/:categoryName', userController.getCategoryProducts);
+
 // GET PROFILE
 userRouter.get("/profile", userController.getProfile); // Controller mein res.render('User/profile') karna
 

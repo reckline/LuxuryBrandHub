@@ -1,0 +1,40 @@
+<%- include('../partials/userTop') %>
+<%- include('../partials/userSidebar') %>
+<%- include('../partials/userHeader') %>
+<main class="flex-1 w-full lg:ml-64 transition-all duration-300">
+
+    <%- include('../partials/userBanner') %>
+    
+<h1 class="text-3xl font-bold text-center my-8 uppercase"><%= categoryName %> Brands</h1>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 px-4">
+    <% brandData.forEach(brand => { %>
+        <div class="group relative block overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
+            
+            <img src="<%= brand.imageUrl %>" 
+                 class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" 
+                 alt="<%= brand.name %>"
+                 onerror="this.onerror=null; this.src='/images/placeholder.jpg';">
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <div class="absolute bottom-0 left-0 right-0 p-4 text-white text-center">
+                <h3 class="font-bold text-lg uppercase tracking-wider"><%= brand.name %></h3>
+            </div>
+        </div>
+    <% }) %>
+</div>
+
+
+</main>
+<a href="https://wa.me/917462844102" class="fixed bottom-6 right-6 z-50 bg-green-500 p-4 rounded-full text-white shadow-lg text-2xl hover:scale-110 transition">
+    <i class="fab fa-whatsapp"></i>
+</a>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    }
+</script>
+</body>
+</html>

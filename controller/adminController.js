@@ -2341,12 +2341,12 @@ exports.postAddCategory = async (req, res) => {
         const imageUrl = await uploadToPhpServer(req.file.path);
         const newCategory = new Category({ name: categoryName.trim(), imageUrl: imageUrl });
         await newCategory.save();
-        res.redirect('/admin-category');
+        res.redirect('/admin/category');
     } catch (err) { res.status(500).send("Error: " + err.message); }
 };
 
 exports.deleteCategory = async (req, res) => {
-    try { await Category.findByIdAndDelete(req.params.id); res.redirect('/admin-category'); } catch (err) { res.status(500).send("Error deleting"); }
+    try { await Category.findByIdAndDelete(req.params.id); res.redirect('/admin/category'); } catch (err) { res.status(500).send("Error deleting"); }
 };
 
 exports.getCategoryPage = async (req, res) => {

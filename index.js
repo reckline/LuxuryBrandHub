@@ -1,5 +1,3 @@
-
-
 require("dotenv").config();
 
 // FIX: MaxListenersExceededWarning ke liye
@@ -22,13 +20,15 @@ const User = require("./model/userSchema");
 const Category = require("./model/categorySchema");
 
 const app = express();
+
+// FIX: Views path ko absolute path banaya hai taaki Linux/Hostinger par error na ho
 app.set("view engine", "ejs");
-app.set("views", "views");
+app.set("views", path.join(rootDir, "views"));
 
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
   collection: "sessions",
-  touchAfter: 24 * 3600 
+  touchAfter: 24 * 3600
 });
 store.on("error", console.log);
 
@@ -51,24 +51,24 @@ app.use("/payment/razorpay-webhook", express.raw({ type: "*/*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// STATIC FILES: Yahan 'public' folder serve ho raha hai
+// STATIC FILES
 app.use(express.static(path.join(rootDir, "public")));
 
+// GLOBAL MIDDLEWARE
 app.use(async (req, res, next) => {
   try {
     res.locals.isLoggedIn = req.session.isLoggedIn || false;
     res.locals.user = req.session.user || null;
     res.locals.admin = req.session.admin || null; 
 
-    // --- DYNAMIC DATA FOR ALL PAGES ---
-    // Ab 'allCategories' har view mein available hoga, baar baar fetch nahi hoga
-    res.locals.allCategories = await Category.find({}).lean();
+    // Category fetch karte waqt error handling
+    res.locals.allCategories = await Category.find({}).lean().catch(() => []);
 
     res.locals.wishlistIds = [];
     res.locals.cartProductIds = [];
 
     if (req.session.isLoggedIn && req.session.user) {
-      const user = await User.findById(req.session.user._id).select("wishlist cart");
+      const user = await User.findById(req.session.user._id).select("wishlist cart").lean();
       if (user?.wishlist?.length) {
         res.locals.wishlistIds = user.wishlist.map(id => id.toString());
       }
@@ -109,7 +109,6 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
-      console.log(`Visit: http://localhost:${PORT}/`);
     });
   })
   .catch((err) => console.log("❌ Database connection error:", err));

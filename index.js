@@ -3,7 +3,7 @@ require("dotenv").config();
 // FIX: MaxListenersExceededWarning ke liye
 require('events').EventEmitter.defaultMaxListeners = 20;
 
-console.log("DEBUG ENV:", process.env.MONGO_URI);
+console.log("DEBUG ENV:", process.env.MONGO_URI ? "Loaded" : "Missing");
 
 const express = require("express");
 const path = require("path");
@@ -21,7 +21,7 @@ const Category = require("./model/categorySchema");
 
 const app = express();
 
-// FIX: Views path ko absolute path banaya hai taaki Linux/Hostinger par error na ho
+// VIEWS CONFIGURATION - Absolute Path (Fixes Linux Pathing Issues)
 app.set("view engine", "ejs");
 app.set("views", path.join(rootDir, "views"));
 
@@ -30,7 +30,7 @@ const store = new MongoDBStore({
   collection: "sessions",
   touchAfter: 24 * 3600
 });
-store.on("error", console.log);
+store.on("error", (err) => console.log("Session Store Error:", err));
 
 // SESSION CONFIGURATION
 app.use(
@@ -57,17 +57,17 @@ app.use(express.static(path.join(rootDir, "public")));
 // GLOBAL MIDDLEWARE
 app.use(async (req, res, next) => {
   try {
-    res.locals.isLoggedIn = req.session.isLoggedIn || false;
-    res.locals.user = req.session.user || null;
-    res.locals.admin = req.session.admin || null; 
+    res.locals.isLoggedIn = req.session?.isLoggedIn || false;
+    res.locals.user = req.session?.user || null;
+    res.locals.admin = req.session?.admin || null; 
 
-    // Category fetch karte waqt error handling
+    // Category fetch
     res.locals.allCategories = await Category.find({}).lean().catch(() => []);
 
     res.locals.wishlistIds = [];
     res.locals.cartProductIds = [];
 
-    if (req.session.isLoggedIn && req.session.user) {
+    if (req.session?.isLoggedIn && req.session?.user) {
       const user = await User.findById(req.session.user._id).select("wishlist cart").lean();
       if (user?.wishlist?.length) {
         res.locals.wishlistIds = user.wishlist.map(id => id.toString());
@@ -93,7 +93,7 @@ app.use((req, res, next) => {
   res.status(404);
   res.render("404", { 
     pageTitle: "Page Not Found", 
-    isLoggedIn: req.session.isLoggedIn 
+    isLoggedIn: req.session?.isLoggedIn || false 
   }, (err, html) => {
     if (err) {
       return res.send("<h1>404 - Page Not Found</h1><a href='/'>Go Home</a>");
@@ -109,6 +109,7 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
+      console.log(`✅ Views directory set to: ${path.join(rootDir, "views")}`);
     });
   })
   .catch((err) => console.log("❌ Database connection error:", err));

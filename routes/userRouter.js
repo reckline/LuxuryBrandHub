@@ -2,21 +2,22 @@ const express = require('express');
 const userRouter = express.Router();
 const userController = require('../controller/userController');
 const upload = require("../utils/multer");
+const path = require("path");
 
 // Models import
 const Category = require('../model/categorySchema'); 
 const Product = require('../model/productSchema'); 
 
-// Updated Home Route with robust error handling
+// FIX: Path changed to 'home' because file is in views/home.ejs
 userRouter.get('/', async (req, res, next) => {
     try {
-        // Lean() use kiya hai taaki performance fast ho (Live server ke liye best hai)
         const categories = await Category.find({}).lean();
-        
-        // Agar database se data nahi mil raha, toh empty array bhejo, crash mat hone do
         const brands = await Product.distinct("brand").catch(() => []); 
         
-        res.render('user/home', { 
+        // FIX: 'user/home' ki jagah 'home' use kiya hai kyunki file views/home.ejs mein hai
+        const viewPath = 'home'; 
+        
+        res.render(viewPath, { 
             categories: categories || [], 
             brands: brands || [],
             isLoggedIn: req.session?.isLoggedIn || false,
@@ -24,7 +25,6 @@ userRouter.get('/', async (req, res, next) => {
         });
     } catch (error) {
         console.error("Home Route Error:", error);
-        // Error aane par 500 render karne ki jagah next(error) karo
         next(error);
     }
 });

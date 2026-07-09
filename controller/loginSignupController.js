@@ -248,6 +248,10 @@
 //   },
 // ];
 
+
+
+
+
 const { check, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require("../model/userSchema");
@@ -270,7 +274,7 @@ exports.getLogout = (req, res, next) => {
 
 exports.getLogin = (req, res, next) => {
   try {
-    // UPDATED: 'userLoginSignup/login' -> 'login'
+    // Render using file name only, Express will find it in the registered directories
     res.render("login", {
       pageTitle: "Login",
       isLoggedIn: false,
@@ -294,7 +298,6 @@ exports.postLogin = [
     const { login, password } = req.body;
 
     if (!errors.isEmpty()) {
-      // UPDATED: 'userLoginSignup/login' -> 'login'
       return res.status(400).render("login", {
         pageTitle: "Login",
         isLoggedIn: false,
@@ -309,7 +312,6 @@ exports.postLogin = [
       });
 
       if (!user) {
-        // UPDATED: 'userLoginSignup/login' -> 'login'
         return res.status(400).render("login", {
           pageTitle: "Login",
           isLoggedIn: false,
@@ -319,7 +321,6 @@ exports.postLogin = [
       }
 
       if (user.userStatus === "suspended") {
-        // UPDATED: 'userLoginSignup/login' -> 'login'
         return res.status(403).render("login", {
           pageTitle: "Login",
           isLoggedIn: false,
@@ -331,7 +332,6 @@ exports.postLogin = [
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        // UPDATED: 'userLoginSignup/login' -> 'login'
         return res.status(400).render("login", {
           pageTitle: "Login",
           isLoggedIn: false,
@@ -365,7 +365,6 @@ exports.postLogin = [
       return res.redirect("/");
     } catch (err) {
       console.error("Login Error:", err);
-      // UPDATED: 'userLoginSignup/login' -> 'login'
       res.status(500).render("login", {
         pageTitle: "Login",
         isLoggedIn: false,
@@ -381,7 +380,6 @@ exports.getSignup = async (req, res, next) => {
     if (req.session.isLoggedIn) {
       return res.redirect("/");
     }
-    // UPDATED: 'userLoginSignup/signup' -> 'signup'
     res.render("signup", {
       errors: [],
       oldInput: { username: "", phoneNo: "", emailAddress: "", password: "" },
@@ -421,7 +419,6 @@ exports.postSignup = [
     const { username, phoneNo, emailAddress, password } = req.body;
 
     if (!errors.isEmpty()) {
-      // UPDATED: 'userLoginSignup/signup' -> 'signup'
       return res.status(400).render("signup", {
         isLoggedIn: false,
         errors: errors.array().map((e) => e.msg),
@@ -446,7 +443,6 @@ exports.postSignup = [
       res.redirect("/login");
     } catch (err) {
       console.error("Signup Error:", err);
-      // UPDATED: 'userLoginSignup/signup' -> 'signup'
       res.status(500).render("signup", {
         isLoggedIn: false,
         errors: ["Something went wrong. Please try again."],

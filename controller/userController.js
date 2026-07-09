@@ -1,7 +1,7 @@
 const Category = require('../model/categorySchema'); 
 const Product = require('../model/productSchema');
 const User = require("../model/userSchema");
-const Order = require("../model/orderSchema");
+
 const uploadToPhpServer = require("../utils/uploadToPhpServer");
 
 exports.getHome = async (req, res, next) => {
@@ -1774,7 +1774,6 @@ exports.getNikeProducts = async (req, res, next) => {
 
 
 // =====================================================================================================================
-
 exports.getCategoryProducts = async (req, res, next) => {
     try {
         const categorySlug = req.params.categoryName; 
@@ -1785,37 +1784,123 @@ exports.getCategoryProducts = async (req, res, next) => {
         });
 
         if (!category) {
-            // UPDATED: 'User/404' -> '404' (Server par path conflict avoid karne ke liye)
-            return res.render('404', { pageTitle: "Category Not Found" });
+            return res.render('404', { 
+                pageTitle: "Category Not Found",
+                isLoggedIn: req.session?.isLoggedIn || false 
+            });
         }
 
         // Us category ke products find karo
         const products = await Product.find({ category: category._id });
 
-        // BRAND LOGIC: Unique brands nikalna aur unki image set karna
+        // BRAND LOGIC: Products se brand nikalna
         const uniqueBrands = [...new Set(products.map(p => p.brand))];
         
         const brandData = uniqueBrands.map(brandName => {
             const productWithImage = products.find(p => p.brand === brandName);
             return { 
                 name: brandName, 
-                imageUrl: (productWithImage && productWithImage.imageUrl) ? productWithImage.imageUrl : '/images/placeholder.jpg' 
+                imageUrl: (productWithImage && productWithImage.images && productWithImage.images.length > 0) 
+                           ? productWithImage.images[0] 
+                           : '/images/placeholder.jpg' 
             };
         });
 
         // NAYA BRAND LOGIC: Database ke 'brands' array se data nikalna
         const dbBrands = (category.brands && category.brands.length > 0) 
-            ? category.brands.map(b => ({ name: b.name, imageUrl: b.image })) 
+            ? category.brands.map(b => ({ 
+                name: b.name, 
+                imageUrl: b.image || '/images/placeholder.jpg' 
+            })) 
             : brandData;
 
-        // Ab view ko updated brandData bhej rahe hain
-        // UPDATED: 'User/category-page' -> 'category-page'
+        // Render category-page
         res.render('category-page', { 
             products: products, 
             categoryName: category.name,
-            brandData: dbBrands 
+            brandData: dbBrands,
+            isLoggedIn: req.session?.isLoggedIn || false,
+            user: req.session?.user || null
         });
     } catch (error) {
+        console.error("Category Products Error:", error);
         next(error);
+    }
+};
+
+exports.getViewProduct = async (req, res, next) => {
+    const prodId = req.params.id;
+    try {
+        const product = await Product.findById(prodId);
+        
+        if (!product) {
+            return res.redirect('/');
+        }
+
+        res.render('view-product', {
+            pageTitle: product.title,
+            product: product,
+            isLoggedIn: req.session?.isLoggedIn || false,
+            user: req.session?.user || null
+        });
+    } catch (err) {
+        console.error("Error fetching product:", err);
+        next(err);
+    }
+};
+
+exports.getBrandProducts = async (req, res, next) => {
+    try {
+        const brandName = req.params.brandName;
+        
+        // Debugging ke liye: Terminal mein dekho ki kya brandName sahi aa raha hai
+        console.log("Searching for brand:", brandName);
+
+        // Brand ke hisaab se products nikalo
+        // $regex use kiya hai jo case-insensitive search karega
+        const products = await Product.find({ 
+            brand: { $regex: new RegExp('^' + brandName.trim() + '$', 'i') } 
+        });
+
+        // Debugging: Check karo products mile ya nahi
+        console.log("Products found:", products.length);
+        
+        res.render('category-page', { 
+            products: products, 
+            categoryName: brandName,
+            brandData: [], 
+            isLoggedIn: req.session?.isLoggedIn || false,
+            user: req.session?.user || null
+        });
+    } catch (err) {
+        console.error("Brand Products Error:", err);
+        next(err);
+    }
+};
+
+
+
+const Order = require('../model/orderSchema'); // Tumhara import line
+
+// controller/userController.js
+
+exports.getOrderHistory = async (req, res, next) => {
+    try {
+        if (!req.session || !req.session.user) {
+            return res.redirect('/login'); 
+        }
+
+        const userId = req.session.user._id;
+        const orders = await Order.find({ userId: userId }).sort({ createdAt: -1 });
+
+        // Yahan file ka naam exact 'orderHistory' rakho
+        res.render('orderHistory', { 
+            orders: orders || [],
+            isLoggedIn: req.session.isLoggedIn || false,
+            user: req.session.user
+        });
+    } catch (err) {
+        console.error("Error in getOrderHistory:", err);
+        next(err);
     }
 };

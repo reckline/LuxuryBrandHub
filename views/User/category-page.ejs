@@ -5,24 +5,48 @@
 
     <%- include('../partials/userBanner') %>
     
-<h1 class="text-3xl font-bold text-center my-8 uppercase"><%= categoryName %> Brands</h1>
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-6 px-4">
-    <% brandData.forEach(brand => { %>
-        <div class="group relative block overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
-            
-            <img src="<%= brand.imageUrl %>" 
-                 class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500" 
-                 alt="<%= brand.name %>"
-                 onerror="this.onerror=null; this.src='/images/placeholder.jpg';">
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            
-            <div class="absolute bottom-0 left-0 right-0 p-4 text-white text-center">
-                <h3 class="font-bold text-lg uppercase tracking-wider"><%= brand.name %></h3>
-            </div>
+<div class="flex justify-center items-center mb-4 pt-12">
+  <div class="w-[95%] sm:w-4/5 md:w-3/5 lg:w-[95%] text-center relative group">
+    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 py-2 px-6 rounded-t-lg text-lg sm:text-xl font-bold tracking-wider uppercase text-white shadow-lg">
+      <%= categoryName %> Brands
+    </div>
+    
+    <div class="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-[length:200%_100%] animate-gradient-x"></div>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 sm:px-6 py-8 sm:py-12">
+  <% products.forEach(product => { %>
+    <div class="group bg-white border border-gray-100 rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-[0_4px_20px_rgb(0,0,0,0.05)] transition-all duration-300 hover:shadow-[0_20px_40px_rgb(0,0,0,0.1)] hover:-translate-y-1">
+      
+      <div class="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gray-100 aspect-square">
+        <img src="<%= product.images[0] %>" 
+             class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105" 
+             alt="<%= product.title %>">
+        
+        <div class="absolute top-3 left-3 bg-purple-900 text-white text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1 rounded-full uppercase tracking-widest">
+          <%= product.offerPercentage %>% Off
         </div>
-    <% }) %>
+      </div>
+
+      <div class="mt-4 sm:mt-5 px-1">
+        <h3 class="text-gray-900 font-semibold text-base sm:text-lg truncate"><%= product.title %></h3>
+        
+        <div class="flex items-center justify-between mt-2 sm:mt-3">
+          <div>
+            <span class="text-gray-900 font-bold text-lg sm:text-xl">₹<%= product.offerPrice %></span>
+            <span class="text-gray-400 line-through text-xs sm:text-sm ml-1.5">₹<%= product.price %></span>
+          </div>
+        </div>
+        
+        <a href="/view-product/<%= product._id %>" 
+           class="mt-4 sm:mt-6 w-full flex items-center justify-center bg-purple-900 hover:bg-black text-white py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-medium tracking-wide transition-all duration-300 active:scale-95">
+           SHOP NOW
+        </a>
+      </div>
+    </div>
+  <% }) %>
 </div>
 
 

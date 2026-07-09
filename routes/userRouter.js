@@ -7,6 +7,7 @@ const path = require("path");
 // Models import
 const Category = require('../model/categorySchema'); 
 const Product = require('../model/productSchema'); 
+const Order = require('../model/orderSchema');
 
 // 1. HOME ROUTE
 userRouter.get('/', async (req, res, next) => {
@@ -34,19 +35,15 @@ userRouter.get("/profile", userController.getProfile);
 userRouter.get('/luxuryBoysWatches', (req, res) => res.render('luxuryBoysWatches'));
 userRouter.get('/luxuryGirlsWatches', (req, res) => res.render('luxuryGirlsWatches'));
 
-// 3. DYNAMIC ROUTES (Specific paths pehle rakhe hain)
-userRouter.get('/product/:id', userController.getViewProduct);
+// 3. DYNAMIC ROUTES
+userRouter.get('/view-product/:id', userController.getViewProduct);
 userRouter.get("/order-success/:id", userController.getOrderSuccess);
 
-// DEBUGGING: Ye log tumhe terminal mein batayega ki request yahan tak aa rahi hai ya nahi
-userRouter.use('/:categoryName', (req, res, next) => {
-    console.log("DEBUG: Category route hit with:", req.params.categoryName);
-    next();
-});
+// 4. PREFIXED ROUTES (Category & Brand)
+userRouter.get('/category/:categoryName', userController.getCategoryProducts);
+userRouter.get('/brand/:brandName', userController.getBrandProducts);
 
-userRouter.get('/:categoryName', userController.getCategoryProducts);
-
-// 4. POST ROUTES
+// 5. POST ROUTES
 userRouter.post("/wishlist/toggle", userController.posttoggleWishlist);
 userRouter.post('/add-to-cart', userController.postAddToCart);
 userRouter.post('/buy-now', userController.postBuyNowOrder);
@@ -55,7 +52,7 @@ userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
 userRouter.post("/order/cancel", userController.cancelOrder);
 
-// 5. UPDATE PROFILE
+// 6. UPDATE PROFILE
 userRouter.post(
   "/update-user-data",
   (req, res, next) => {
@@ -71,5 +68,33 @@ userRouter.post(
   },
   userController.updateUserData
 );
+
+// 7. SMART REDIRECT & FALLBACK (SABSE NICHE)
+userRouter.get('/:slug', async (req, res, next) => {
+    const slug = req.params.slug;
+    try {
+        // 1. Check: Kya ye slug koi exist karne wali Category hai?
+        const isCategory = await Category.findOne({ name: { $regex: new RegExp('^' + slug + '$', 'i') } });
+        if (isCategory) {
+            return res.redirect(`/category/${slug}`);
+        }
+
+        // 2. AGAR KOI PRODUCT MILTA HAI IS BRAND KA, TABHI BRAND PAGE PAR BHEJO
+        // Agar tum chahte ho ki khali brand page bhi dikhe, toh is check ko hata kar
+        // seedha "return res.redirect(`/brand/${slug}`)" kar sakte ho.
+        const productExists = await Product.findOne({ brand: { $regex: new RegExp('^' + slug + '$', 'i') } });
+        
+        if (productExists) {
+            return res.redirect(`/brand/${slug}`);
+        } else {
+            // Agar brand ka koi product nahi hai, lekin tum phir bhi page dikhana chahte ho:
+            return res.redirect(`/brand/${slug}`); 
+        }
+
+    } catch (err) {
+        next(err);
+    }
+});
+
 
 module.exports = userRouter;

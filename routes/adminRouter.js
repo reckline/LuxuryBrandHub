@@ -5,7 +5,6 @@ const upload = require("../utils/multer");
 
 // Middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
-    // Session check
     if (!req.session || !req.session.isLoggedIn || !req.session.user) {
         console.log("DEBUG: Session Missing or Incomplete:", req.session);
         return res.status(401).send("Unauthorized: Please login first.");
@@ -13,33 +12,34 @@ const isAuthenticated = (req, res, next) => {
     return next();
 };
 
-// --- DASHBOARD ROUTES (All prefixed with /admin via index.js) ---
-adminRouter.get('/admin-home', isAuthenticated, adminController.getAdminHome);
-adminRouter.get('/admin-userlist', isAuthenticated, adminController.getAdminUsersList);
-adminRouter.get('/admin-seeuseralldetails/:id', isAuthenticated, adminController.getAdminSeeUserAllDetails);
-adminRouter.get('/admin-newoder', isAuthenticated, adminController.getAdminNewOrders);
-adminRouter.post('/admin-update-order-status', isAuthenticated, adminController.postAdminUpdateOrderStatus);
-adminRouter.get('/admin-order-history', isAuthenticated, adminController.getAdminOrderHistory);
-adminRouter.get('/totalproducts', adminController.getTotalProductsCount);
-adminRouter.get('/totalpendingorders', adminController.getTotalPendingOrdersCount);
-adminRouter.get('/cancel-orders', adminController.getCancelOrders);
-adminRouter.get('/totalcomplitedorders', adminController.getTotalComplitedOrdersCount);
-adminRouter.get('/totalorders', adminController.getTotalOrdersCount);
-adminRouter.get('/todaysorders', adminController.getTodaysOrdersCount);
-adminRouter.get('/yesterdayorders', adminController.getYesterdayOrdersCount);
-adminRouter.get('/total-sales', adminController.getTotalSales);
-adminRouter.get('/todaysale', adminController.getTodaySales);
-adminRouter.get('/yesterdaysale', adminController.getYesterdaySales);
+// --- DASHBOARD ROUTES (Access: /admin/home, /admin/userlist, etc.) ---
+adminRouter.get('/home', isAuthenticated, adminController.getAdminHome);
+adminRouter.get('/userlist', isAuthenticated, adminController.getAdminUsersList);
+adminRouter.get('/seeuseralldetails/:id', isAuthenticated, adminController.getAdminSeeUserAllDetails);
+adminRouter.get('/newoder', isAuthenticated, adminController.getAdminNewOrders);
+adminRouter.post('/update-order-status', isAuthenticated, adminController.postAdminUpdateOrderStatus);
+adminRouter.get('/order-history', isAuthenticated, adminController.getAdminOrderHistory);
+
+// Stats & Data
+adminRouter.get('/totalproducts', isAuthenticated, adminController.getTotalProductsCount);
+adminRouter.get('/totalpendingorders', isAuthenticated, adminController.getTotalPendingOrdersCount);
+adminRouter.get('/cancel-orders', isAuthenticated, adminController.getCancelOrders);
+adminRouter.get('/totalcomplitedorders', isAuthenticated, adminController.getTotalComplitedOrdersCount);
+adminRouter.get('/totalorders', isAuthenticated, adminController.getTotalOrdersCount);
+adminRouter.get('/todaysorders', isAuthenticated, adminController.getTodaysOrdersCount);
+adminRouter.get('/yesterdayorders', isAuthenticated, adminController.getYesterdayOrdersCount);
+adminRouter.get('/total-sales', isAuthenticated, adminController.getTotalSales);
+adminRouter.get('/todaysale', isAuthenticated, adminController.getTodaySales);
+adminRouter.get('/yesterdaysale', isAuthenticated, adminController.getYesterdaySales);
 
 // --- CATEGORY & BRAND ROUTES ---
-adminRouter.get('/admin-category', isAuthenticated, adminController.getAdminCategory);
+adminRouter.get('/category', isAuthenticated, adminController.getAdminCategory);
 adminRouter.post('/delete-category/:id', isAuthenticated, adminController.deleteCategory);
-adminRouter.get('/category/:name', adminController.getCategoryPage);
+adminRouter.get('/category/:name', isAuthenticated, adminController.getCategoryPage);
 
-// Unified add-brand route
+// Brand Management
 adminRouter.post('/add-brand', isAuthenticated, upload.single('brandImage'), adminController.addBrandToCategory);
 adminRouter.post('/delete-brand', isAuthenticated, adminController.deleteBrand);
-
 adminRouter.post('/add-category', isAuthenticated, upload.single('categoryImage'), adminController.postAddCategory);
 
 // --- SIZE MANAGEMENT ---
@@ -47,7 +47,7 @@ adminRouter.post('/add-size', isAuthenticated, adminController.addSize);
 adminRouter.post('/delete-size', isAuthenticated, adminController.deleteSize);
 
 // --- DYNAMIC PRODUCT ROUTES ---
-adminRouter.get('/products/:categoryName', adminController.getCategoryProducts);
+adminRouter.get('/products/:categoryName', isAuthenticated, adminController.getCategoryProducts);
 
 // 2. Add Product (Universal)
 adminRouter.post(

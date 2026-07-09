@@ -21,7 +21,7 @@ const app = express();
 
 app.set("view engine", "ejs");
 
-// UPDATE: 'UserLoginSignup' folder ka path yahan add kar diya hai
+// Views directories registration
 app.set("views", [
     path.join(rootDir, "views"),
     path.join(rootDir, "views", "User"),
@@ -57,7 +57,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(rootDir, "public")));
 
-// GLOBAL MIDDLEWARE
+// GLOBAL MIDDLEWARE - Isme 'next()' har condition mein call hona chahiye
 app.use(async (req, res, next) => {
   try {
     res.locals.isLoggedIn = req.session?.isLoggedIn || false;
@@ -76,11 +76,10 @@ app.use(async (req, res, next) => {
         res.locals.cartProductIds = user.cart.map(item => item.product.toString());
       }
     }
-    next();
   } catch (err) {
     console.error("Global middleware error:", err);
-    next();
   }
+  next(); // Yahan next() zaroori hai
 });
 
 // ROUTE ORDERING
@@ -89,7 +88,7 @@ app.use("/admin", adminRouter);
 app.use(paymentRouter);
 app.use(userRouter);
 
-// ERROR HANDLING (404)
+// ERROR HANDLING (404) - Sabse niche rakho
 app.use((req, res, next) => {
   res.status(404).render("404", { 
     pageTitle: "Page Not Found", 
@@ -97,10 +96,10 @@ app.use((req, res, next) => {
   });
 });
 
-// CRITICAL ERROR HANDLING (500)
+// CRITICAL ERROR HANDLING (500) - Final fallback
 app.use((err, req, res, next) => {
     console.error("CRITICAL SERVER ERROR:", err.stack);
-    res.status(500).send(`<h1>500 Internal Server Error</h1><pre>${err.message}</pre>`);
+    res.status(500).send("<h1>500 Internal Server Error</h1><p>Something went wrong on the server.</p>");
 });
 
 const PORT = process.env.PORT || 3000;

@@ -250,8 +250,6 @@
 
 
 
-
-
 const { check, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require("../model/userSchema");
@@ -274,7 +272,6 @@ exports.getLogout = (req, res, next) => {
 
 exports.getLogin = (req, res, next) => {
   try {
-    // Render using file name only, Express will find it in the registered directories
     res.render("login", {
       pageTitle: "Login",
       isLoggedIn: false,
@@ -358,8 +355,9 @@ exports.postLogin = [
 
       await req.session.save();
 
+      // UPDATED: Redirect path changed to /admin/admin-home
       if (user.role === "admin") {
-        return res.redirect("/admin-home");
+        return res.redirect("/admin/admin-home");
       }
 
       return res.redirect("/");

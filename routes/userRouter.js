@@ -14,7 +14,6 @@ userRouter.get('/', async (req, res, next) => {
         const categories = await Category.find({}).lean();
         const brands = await Product.distinct("brand").catch(() => []); 
         
-        // Tumhari files direct 'views' folder mein hain, toh path 'home' hoga, 'User/home' nahi
         res.render('home', { 
             categories: categories || [], 
             brands: brands || [],
@@ -27,7 +26,7 @@ userRouter.get('/', async (req, res, next) => {
     }
 });
 
-// 2. STATIC ROUTES (Pehle define karo)
+// 2. STATIC ROUTES
 userRouter.get('/wishlist', userController.getWishlist);
 userRouter.get('/add-to-cart', userController.getAddToCart);
 userRouter.get('/order-history', userController.getOrderHistory);
@@ -35,7 +34,19 @@ userRouter.get("/profile", userController.getProfile);
 userRouter.get('/luxuryBoysWatches', (req, res) => res.render('luxuryBoysWatches'));
 userRouter.get('/luxuryGirlsWatches', (req, res) => res.render('luxuryGirlsWatches'));
 
-// 3. POST ROUTES
+// 3. DYNAMIC ROUTES (Specific paths pehle rakhe hain)
+userRouter.get('/product/:id', userController.getViewProduct);
+userRouter.get("/order-success/:id", userController.getOrderSuccess);
+
+// DEBUGGING: Ye log tumhe terminal mein batayega ki request yahan tak aa rahi hai ya nahi
+userRouter.use('/:categoryName', (req, res, next) => {
+    console.log("DEBUG: Category route hit with:", req.params.categoryName);
+    next();
+});
+
+userRouter.get('/:categoryName', userController.getCategoryProducts);
+
+// 4. POST ROUTES
 userRouter.post("/wishlist/toggle", userController.posttoggleWishlist);
 userRouter.post('/add-to-cart', userController.postAddToCart);
 userRouter.post('/buy-now', userController.postBuyNowOrder);
@@ -43,13 +54,6 @@ userRouter.post("/cart/update-qty", userController.updateCartQty);
 userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
 userRouter.post("/order/cancel", userController.cancelOrder);
-
-// 4. DYNAMIC ROUTES (Dhyan rahe: ye sabse niche hone chahiye)
-userRouter.get('/product/:id', userController.getViewProduct);
-userRouter.get("/order-success/:id", userController.getOrderSuccess);
-
-// YEH DYNAMIC ROUTE HAMESHA SABSE NICHE RAKHO
-userRouter.get('/:categoryName', userController.getCategoryProducts);
 
 // 5. UPDATE PROFILE
 userRouter.post(

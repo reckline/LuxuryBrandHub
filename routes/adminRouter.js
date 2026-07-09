@@ -5,7 +5,7 @@ const upload = require("../utils/multer");
 
 // Middleware to check if user is logged in
 const isAuthenticated = (req, res, next) => {
-    // DEBUG: Checking session state
+    // Session check
     if (!req.session || !req.session.isLoggedIn || !req.session.user) {
         console.log("DEBUG: Session Missing or Incomplete:", req.session);
         return res.status(401).send("Unauthorized: Please login first.");
@@ -13,13 +13,13 @@ const isAuthenticated = (req, res, next) => {
     return next();
 };
 
-// --- DASHBOARD ROUTES ---
-adminRouter.get('/admin-home', adminController.getAdminHome);
-adminRouter.get('/admin-userlist', adminController.getAdminUsersList);
-adminRouter.get('/admin-seeuseralldetails/:id', adminController.getAdminSeeUserAllDetails);
-adminRouter.get('/admin-newoder', adminController.getAdminNewOrders);
-adminRouter.post('/admin-update-order-status', adminController.postAdminUpdateOrderStatus);
-adminRouter.get('/admin-order-history', adminController.getAdminOrderHistory);
+// --- DASHBOARD ROUTES (All prefixed with /admin via index.js) ---
+adminRouter.get('/admin-home', isAuthenticated, adminController.getAdminHome);
+adminRouter.get('/admin-userlist', isAuthenticated, adminController.getAdminUsersList);
+adminRouter.get('/admin-seeuseralldetails/:id', isAuthenticated, adminController.getAdminSeeUserAllDetails);
+adminRouter.get('/admin-newoder', isAuthenticated, adminController.getAdminNewOrders);
+adminRouter.post('/admin-update-order-status', isAuthenticated, adminController.postAdminUpdateOrderStatus);
+adminRouter.get('/admin-order-history', isAuthenticated, adminController.getAdminOrderHistory);
 adminRouter.get('/totalproducts', adminController.getTotalProductsCount);
 adminRouter.get('/totalpendingorders', adminController.getTotalPendingOrdersCount);
 adminRouter.get('/cancel-orders', adminController.getCancelOrders);
@@ -32,27 +32,26 @@ adminRouter.get('/todaysale', adminController.getTodaySales);
 adminRouter.get('/yesterdaysale', adminController.getYesterdaySales);
 
 // --- CATEGORY & BRAND ROUTES ---
-adminRouter.get('/admin-category', adminController.getAdminCategory);
-adminRouter.post('/admin/delete-category/:id', adminController.deleteCategory);
-adminRouter.get('/admin/category/:name', adminController.getCategoryPage);
-// FIX: Added upload middleware here
-adminRouter.post('/admin/add-brand', upload.single('brandImage'), adminController.addBrandToCategory);
-adminRouter.post('/admin/delete-brand', adminController.deleteBrand);
-adminRouter.get('/admin/category/:categoryName', adminController.getCategoryProducts);
-adminRouter.post('/admin/add-category', upload.single('categoryImage'), adminController.postAddCategory);
+adminRouter.get('/admin-category', isAuthenticated, adminController.getAdminCategory);
+adminRouter.post('/delete-category/:id', isAuthenticated, adminController.deleteCategory);
+adminRouter.get('/category/:name', adminController.getCategoryPage);
+
+// Unified add-brand route
+adminRouter.post('/add-brand', isAuthenticated, upload.single('brandImage'), adminController.addBrandToCategory);
+adminRouter.post('/delete-brand', isAuthenticated, adminController.deleteBrand);
+
+adminRouter.post('/add-category', isAuthenticated, upload.single('categoryImage'), adminController.postAddCategory);
 
 // --- SIZE MANAGEMENT ---
-adminRouter.post('/admin-add-size', adminController.addSize);
-adminRouter.post('/admin-delete-size', adminController.deleteSize);
+adminRouter.post('/add-size', isAuthenticated, adminController.addSize);
+adminRouter.post('/delete-size', isAuthenticated, adminController.deleteSize);
 
 // --- DYNAMIC PRODUCT ROUTES ---
-adminRouter.get('/admin/products/:categoryName', adminController.getCategoryProducts);
-// SAHI CODE (Function name matching your controller):
-adminRouter.post('/admin/add-brand', upload.single('brandImage'), adminController.addBrandToCategory);
+adminRouter.get('/products/:categoryName', adminController.getCategoryProducts);
 
-// 2. Add Product (Universal) - Added isAuthenticated middleware
+// 2. Add Product (Universal)
 adminRouter.post(
-  "/admin/products/add",
+  "/products/add",
   isAuthenticated, 
   (req, res, next) => {
     upload.array("images", 4)(req, res, (err) => {
@@ -67,9 +66,9 @@ adminRouter.post(
   adminController.postCategoryProduct
 );
 
-// 3. Edit Product (Universal) - Added isAuthenticated middleware
+// 3. Edit Product (Universal)
 adminRouter.post(
-  "/admin/products/edit",
+  "/products/edit",
   isAuthenticated,
   (req, res, next) => {
     upload.array("images", 4)(req, res, (err) => {

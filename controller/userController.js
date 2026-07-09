@@ -1818,3 +1818,48 @@ exports.getCategoryProducts = async (req, res, next) => {
         next(error);
     }
 };
+
+// exports.getCategoryProducts = async (req, res, next) => {
+//     try {
+//         const categorySlug = req.params.categoryName; 
+        
+//         // Database mein category search
+//         const category = await Category.findOne({ 
+//             name: { $regex: new RegExp('^' + categorySlug + '$', 'i') } 
+//         });
+
+//         if (!category) {
+//             // FIX: Folder path hata diya kyunki file direct 'views' mein hai
+//             return res.render('404', { pageTitle: "Category Not Found" });
+//         }
+
+//         // Us category ke products find karo
+//         const products = await Product.find({ category: category._id });
+
+//         // BRAND LOGIC: Unique brands nikalna
+//         const uniqueBrands = [...new Set(products.map(p => p.brand))];
+        
+//         const brandData = uniqueBrands.map(brandName => {
+//             const productWithImage = products.find(p => p.brand === brandName);
+//             return { 
+//                 name: brandName, 
+//                 imageUrl: (productWithImage && productWithImage.imageUrl) ? productWithImage.imageUrl : '/images/placeholder.jpg' 
+//             };
+//         });
+
+//         // NAYA BRAND LOGIC: Database ke 'brands' array se data nikalna
+//         const dbBrands = (category.brands && category.brands.length > 0) 
+//             ? category.brands.map(b => ({ name: b.name, imageUrl: b.image })) 
+//             : brandData;
+
+//         // Ab view ko updated brandData bhej rahe hain
+//         // FIX: Folder path 'User/' hata diya hai
+//         res.render('category-page', { 
+//             products: products, 
+//             categoryName: category.name,
+//             brandData: dbBrands 
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };

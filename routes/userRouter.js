@@ -8,16 +8,14 @@ const path = require("path");
 const Category = require('../model/categorySchema'); 
 const Product = require('../model/productSchema'); 
 
-// FIX: Path changed to 'User/home' because file is in views/User/home.ejs
+// 1. HOME ROUTE
 userRouter.get('/', async (req, res, next) => {
     try {
         const categories = await Category.find({}).lean();
         const brands = await Product.distinct("brand").catch(() => []); 
         
-        // FIX: 'User/home' kyunki file views/User/home.ejs mein hai
-        const viewPath = 'User/home'; 
-        
-        res.render(viewPath, { 
+        // Tumhari files direct 'views' folder mein hain, toh path 'home' hoga, 'User/home' nahi
+        res.render('home', { 
             categories: categories || [], 
             brands: brands || [],
             isLoggedIn: req.session?.isLoggedIn || false,
@@ -29,33 +27,31 @@ userRouter.get('/', async (req, res, next) => {
     }
 });
 
-// Baki routes mein bhi 'User/' prefix add karna hoga
-userRouter.get('/luxuryBoysWatches', (req, res) => res.render('User/luxuryBoysWatches'));
-userRouter.get('/luxuryGirlsWatches', (req, res) => res.render('User/luxuryGirlsWatches'));
-// ... Note: Agar ye routes controller se aa rahe hain, toh controller ke andar res.render mein 'User/' prefix lagana padega.
+// 2. STATIC ROUTES (Pehle define karo)
+userRouter.get('/wishlist', userController.getWishlist);
+userRouter.get('/add-to-cart', userController.getAddToCart);
+userRouter.get('/order-history', userController.getOrderHistory);
+userRouter.get("/profile", userController.getProfile);
+userRouter.get('/luxuryBoysWatches', (req, res) => res.render('luxuryBoysWatches'));
+userRouter.get('/luxuryGirlsWatches', (req, res) => res.render('luxuryGirlsWatches'));
 
-// FIX: Wishlist aur Cart routes ke liye
-userRouter.get('/wishlist', userController.getWishlist); // Controller mein res.render('User/wishlist') karna
-userRouter.get('/add-to-cart', userController.getAddToCart); // Controller mein res.render('User/add-to-cart') karna
-
+// 3. POST ROUTES
 userRouter.post("/wishlist/toggle", userController.posttoggleWishlist);
 userRouter.post('/add-to-cart', userController.postAddToCart);
-userRouter.get('/product/:id', userController.getViewProduct); // Controller mein res.render('User/view-product') karna
-userRouter.get("/order-success/:id", userController.getOrderSuccess);
 userRouter.post('/buy-now', userController.postBuyNowOrder);
-userRouter.get('/order-history', userController.getOrderHistory); // Controller mein res.render('User/orderHistory') karna
-
 userRouter.post("/cart/update-qty", userController.updateCartQty);
 userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
 userRouter.post("/order/cancel", userController.cancelOrder);
 
+// 4. DYNAMIC ROUTES (Dhyan rahe: ye sabse niche hone chahiye)
+userRouter.get('/product/:id', userController.getViewProduct);
+userRouter.get("/order-success/:id", userController.getOrderSuccess);
+
+// YEH DYNAMIC ROUTE HAMESHA SABSE NICHE RAKHO
 userRouter.get('/:categoryName', userController.getCategoryProducts);
 
-// GET PROFILE
-userRouter.get("/profile", userController.getProfile); // Controller mein res.render('User/profile') karna
-
-// POST UPDATE PROFILE
+// 5. UPDATE PROFILE
 userRouter.post(
   "/update-user-data",
   (req, res, next) => {

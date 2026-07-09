@@ -2357,6 +2357,9 @@ exports.getCategoryPage = async (req, res) => {
             return res.status(404).send("Category not found");
         }
 
+        // DEBUG: Check karein ki brands ka format kya hai
+        console.log("DEBUG: Raw brands data from DB:", category.brands);
+
         // FIX: kyunki DB mein ID string format mein hai, 
         // humein category._id ko .toString() karna padega
         const products = await Product.find({ category: category._id.toString() }); 
@@ -2369,7 +2372,8 @@ exports.getCategoryPage = async (req, res) => {
             category, 
             categoryName: category.name, 
             products, 
-            brands: category.brands || [], 
+            // Data ko safely pass karein
+            brands: category.brands && Array.isArray(category.brands) ? category.brands : [], 
             sizes: category.sizes || [] 
         });
     } catch (err) { 
@@ -2381,9 +2385,36 @@ exports.getCategoryPage = async (req, res) => {
 exports.addBrandToCategory = async (req, res) => {
     try {
         const { categoryId, categoryName, brandName } = req.body;
-        await Category.findByIdAndUpdate(categoryId, { $push: { brands: brandName } });
-        res.redirect(`/admin/category/${categoryName}`);
-    } catch (err) { res.status(500).send("Error"); }
+
+        // 1. Image upload handle karein
+        let brandImageUrl = '';
+        if (req.file) {
+            // Aapka existing upload function call karein
+            brandImageUrl = await uploadToPhpServer(req.file.path);
+        } else {
+            return res.status(400).send("Brand image is required.");
+        }
+
+        // 2. Naye schema ke hisaab se object push karein
+        await Category.findByIdAndUpdate(categoryId, { 
+            $push: { 
+                brands: { 
+                    name: brandName, 
+                    image: brandImageUrl 
+                } 
+            } 
+        });
+
+        console.log("SUCCESS: Brand added successfully with image");
+        
+        // Redirect logic (spaces remove karke clean URL)
+        const cleanCategoryName = categoryName.replace(/\s+/g, '');
+        res.redirect(`/admin/category/${cleanCategoryName}`);
+
+    } catch (err) { 
+        console.error("ERROR adding brand:", err);
+        res.status(500).send("Error adding brand: " + err.message); 
+    }
 };
 
 exports.addSize = async (req, res) => {
@@ -2405,7 +2436,19 @@ exports.deleteSize = async (req, res) => {
 exports.deleteBrand = async (req, res) => {
     try {
         const { categoryId, brandName } = req.body;
-        await Category.findByIdAndUpdate(categoryId, { $pull: { brands: brandName } });
+        
+        // $pull ab name property ke basis par match karega
+        await Category.findByIdAndUpdate(categoryId, { 
+            $pull: { 
+                brands: { name: brandName } 
+            } 
+        });
+        
+        console.log(`SUCCESS: Brand '${brandName}' deleted from category ${categoryId}`);
         res.status(200).json({ success: true });
-    } catch (err) { res.status(500).json({ success: false }); }
+        
+    } catch (err) { 
+        console.error("ERROR deleting brand:", err);
+        res.status(500).json({ success: false, message: "Error deleting brand" }); 
+    }
 };

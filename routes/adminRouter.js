@@ -35,7 +35,8 @@ adminRouter.get('/yesterdaysale', adminController.getYesterdaySales);
 adminRouter.get('/admin-category', adminController.getAdminCategory);
 adminRouter.post('/admin/delete-category/:id', adminController.deleteCategory);
 adminRouter.get('/admin/category/:name', adminController.getCategoryPage);
-adminRouter.post('/admin/add-brand', adminController.addBrandToCategory);
+// FIX: Added upload middleware here
+adminRouter.post('/admin/add-brand', upload.single('brandImage'), adminController.addBrandToCategory);
 adminRouter.post('/admin/delete-brand', adminController.deleteBrand);
 adminRouter.get('/admin/category/:categoryName', adminController.getCategoryProducts);
 adminRouter.post('/admin/add-category', upload.single('categoryImage'), adminController.postAddCategory);
@@ -46,6 +47,8 @@ adminRouter.post('/admin-delete-size', adminController.deleteSize);
 
 // --- DYNAMIC PRODUCT ROUTES ---
 adminRouter.get('/admin/products/:categoryName', adminController.getCategoryProducts);
+// SAHI CODE (Function name matching your controller):
+adminRouter.post('/admin/add-brand', upload.single('brandImage'), adminController.addBrandToCategory);
 
 // 2. Add Product (Universal) - Added isAuthenticated middleware
 adminRouter.post(

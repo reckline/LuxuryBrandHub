@@ -3,47 +3,57 @@
 
 <main class="main-content">
   <!-- ======================== Add Brands ============================================= -->
-  <div class="max-w-8xl mx-auto bg-white p-2 rounded-2xl shadow-xl border border-gray-100 mb-10">
+<div class="max-w-8xl mx-auto bg-white p-2 rounded-2xl shadow-xl border border-gray-100 mb-10">
     <div class="flex items-center justify-between mb-8">
       <h1 class="text-m font-extrabold text-gray-900 capitalize tracking-tight"><%= category.name %> </h1>
       <span class="px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold border border-green-200">Active</span>
     </div>
+    
     <div class="bg-gray-900 p-8 rounded-2xl mb-10 shadow-2xl">
       <h3 class="text-m font-bold mb-6 text-white flex items-center gap-2">
         <i class="fa-solid fa-plus-circle text-blue-400"></i> Add New Brand
       </h3>
-      <form action="/admin/add-brand" method="POST" class="flex flex-col md:flex-row gap-4">
+      <form action="/admin/add-brand" method="POST" enctype="multipart/form-data" class="flex flex-col md:flex-row gap-4">
         <input type="hidden" name="categoryId" value="<%= category._id %>">
         <input type="hidden" name="categoryName" value="<%= category.name %>">
+        
         <input type="text" name="brandName" placeholder="e.g. Nike, Apple..." class="flex-1 p-4 bg-gray-800 border-none rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+        
+        <input type="file" name="brandImage" accept="image/*" class="p-3 bg-gray-800 rounded-xl text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white cursor-pointer" required>
+        
         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-blue-900/50"> Add Now </button>
       </form>
     </div>
+
 <div>
   <h3 class="text-m font-bold mb-6 text-gray-800">Existing Brands (<%= (category.brands && category.brands.length) ? category.brands.length : 0 %>)</h3>
   
-  <% if (category.brands && category.brands.length > 0) { %>
-    <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      <% category.brands.forEach(brand => { %>
-        <div class="group relative bg-white border border-gray-200 p-2 rounded-2xl text-center font-medium shadow-sm hover:shadow-md transition-all">
-          <span class="text-gray-700 block mb-1"><%= brand %></span>
-          
-          <button type="button" 
-                  onclick="deleteBrand('<%= category._id %>', '<%= brand %>')"
-                  class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
-            <i class="fa-solid fa-times text-[10px]"></i>
-          </button>
-        </div>
-      <% }) %>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+  
+  <% category.brands.forEach(brand => { %>
+    <div class="group relative bg-white border border-gray-200 p-4 rounded-2xl text-center font-medium shadow-sm hover:shadow-md transition-all">
+      
+      <div class="h-20 flex items-center justify-center mb-2">
+        <% if (typeof brand === 'object' && brand !== null && brand.image) { %>
+          <img src="<%= brand.image %>" class="max-h-full object-contain" />
+        <% } %>
+      </div>
+
+      <span class="text-gray-700 block text-sm truncate">
+        <%= (typeof brand === 'object' && brand !== null) ? brand.name : brand %>
+      </span>
+      
+      <button type="button" 
+              onclick="deleteBrand('<%= category._id %>', '<%= (typeof brand === 'object' && brand !== null) ? brand.name : brand %>')"
+              class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+        <i class="fa-solid fa-times text-[10px]"></i>
+      </button>
     </div>
-  <% } else { %>
-    <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400">
-      <i class="fa-solid fa-tags text-4xl mb-3"></i>
-      <p>No brands added yet.</p>
-    </div>
-  <% } %>
+  <% }) %>
+
 </div>
-  </div>
+</div>
+</div>
   <!-- ==================================================== Add Size ======================================================= -->
 <div class="bg-white p-6 mb-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
     <div>

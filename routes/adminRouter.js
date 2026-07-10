@@ -43,6 +43,10 @@ adminRouter.post('/delete-brand', isAuthenticated, adminController.deleteBrand);
 adminRouter.post('/add-category', isAuthenticated, upload.single('categoryImage'), adminController.postAddCategory);
 
 // --- SIZE MANAGEMENT ---
+
+// adminRouter.post('/add-size', isAuthenticated, adminController.addSize);
+// adminRouter.post('/delete-size', isAuthenticated, adminController.deleteSize);
+
 adminRouter.post('/add-size', isAuthenticated, adminController.addSize);
 adminRouter.post('/delete-size', isAuthenticated, adminController.deleteSize);
 

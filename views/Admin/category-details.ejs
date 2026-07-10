@@ -61,7 +61,7 @@
         <p class="text-[10px] text-gray-400 font-bold uppercase mt-1">Add and manage product sizes</p>
     </div>
 
-    <form id="sizeAddForm" action="/admin-add-size" method="POST" class="flex gap-2">
+    <form id="sizeAddForm" action="/add-size" method="POST" class="flex gap-2">
         <input type="hidden" name="categoryId" value="<%= category._id %>" />
         <input type="text" name="sizeName" placeholder="e.g. 11" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none" required />
         <button type="submit" class="px-6 py-3 bg-blue-600 text-white text-xs font-black uppercase rounded-xl hover:bg-black transition-all whitespace-nowrap">Add Size</button>
@@ -465,33 +465,50 @@ function toggleModal() {
     }
 
     // 6. SIZE MANAGEMENT (ADD/DELETE)
-    document.getElementById('sizeAddForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryId: formData.get('categoryId'), sizeName: formData.get('sizeName') })
-            });
-            if (response.ok) { window.location.reload(); }
-            else { alert("Failed to add size."); }
-        } catch (err) { console.error("Error:", err); }
-    });
+// 1. Add Size Form Handler
+document.getElementById('sizeAddForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
 
-    async function deleteSize(categoryId, sizeName) {
-        if (!confirm("Are you sure you want to delete this size?")) return;
-        try {
-            const response = await fetch('/admin-delete-size', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryId, sizeName })
-            });
-            if (response.ok) { window.location.reload(); }
-            else { alert("Failed to delete size."); }
-        } catch (err) { console.error(err); }
+        // FIX: Path mein '/admin' prefix add kiya
+        const response = await fetch('/admin/add-size', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            alert("Size added!");
+            location.reload();
+        } else {
+            // Error ka pata chalne ke liye response.text() ya json() dekho
+            const errorText = await response.text();
+            alert("Error: " + errorText);
+        }
+    });
+// 2. Delete Size Handler
+async function deleteSize(categoryId, sizeName) {
+    if (!confirm("Are you sure you want to delete this size?")) return;
+    
+    try {
+        // FIX: Route ko '/admin/delete-size' kiya (Kyunki app.js mein /admin prefix hai)
+        const response = await fetch('/admin/delete-size', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryId, sizeName })
+        });
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert("Failed to delete size.");
+        }
+    } catch (err) { 
+        console.error("Delete Error:", err); 
     }
+}
 
     // 7. BRAND MANAGEMENT (DELETE)
     async function deleteBrand(categoryId, brandName) {
@@ -509,6 +526,9 @@ function toggleModal() {
 
 
 </script>
+
+
+
 
   </body>
   </html>

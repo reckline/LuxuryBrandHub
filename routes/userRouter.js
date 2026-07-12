@@ -52,6 +52,11 @@ userRouter.post("/cart/remove", userController.removeFromCart);
 userRouter.post("/cart/checkout", userController.postCartCheckout);
 userRouter.post("/order/cancel", userController.cancelOrder);
 
+
+// userRouter.js mein ye line honi chahiye
+userRouter.get('/products/filter', userController.filterProductsByGender);
+
+
 // 6. UPDATE PROFILE
 userRouter.post(
   "/update-user-data",

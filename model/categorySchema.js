@@ -22,6 +22,11 @@ const categorySchema = new mongoose.Schema({
         enum: ['active', 'inactive'], 
         default: 'active' 
     },
+    // Naya field add kiya gaya hai
+    isGenderFilterEnabled: { 
+        type: Boolean, 
+        default: true 
+    },
     // Brands list ab objects store karegi
     brands: [brandSchema], 
     // New field for Dynamic Sizes

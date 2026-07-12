@@ -55,6 +55,12 @@ adminRouter.get('/products/:categoryName', isAuthenticated, adminController.getC
 
 adminRouter.post('/admin-update-order-status', adminController.postAdminUpdateOrderStatus);
 
+// Isse badal kar ye karo:
+adminRouter.post('/update-category-filter/:id', isAuthenticated, adminController.updateCategory);
+
+
+
+
 
 // 2. Add Product (Universal)
 adminRouter.post(

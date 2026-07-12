@@ -484,3 +484,32 @@ exports.deleteBrand = async (req, res) => {
     }
 };
 
+exports.updateCategory = async (req, res) => {
+    try {
+        const categoryId = req.params.id; // URL se ID lo
+        const { name, status, isGenderFilterEnabled } = req.body; // Baki data body se
+        
+        console.log("Received Data:", { categoryId, name, status, isGenderFilterEnabled });
+
+        const filterStatus = (isGenderFilterEnabled === 'true');
+
+        const updatedCategory = await Category.findByIdAndUpdate(
+            categoryId, 
+            {
+                name,
+                status,
+                isGenderFilterEnabled: filterStatus
+            },
+            { new: true }
+        );
+
+        if (!updatedCategory) {
+            return res.status(404).send("Category not found");
+        }
+
+       res.redirect(`/admin/category/${updatedCategory.name}`);
+    } catch (err) {
+        console.error("Update Error:", err);
+        res.status(500).send("Update failed: " + err.message);
+    }
+};

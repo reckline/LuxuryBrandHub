@@ -1774,6 +1774,61 @@ exports.getNikeProducts = async (req, res, next) => {
 
 
 // =====================================================================================================================
+// exports.getCategoryProducts = async (req, res, next) => {
+//     try {
+//         const categorySlug = req.params.categoryName; 
+        
+//         // Database mein category search
+//         const category = await Category.findOne({ 
+//             name: { $regex: new RegExp('^' + categorySlug + '$', 'i') } 
+//         });
+
+//         if (!category) {
+//             return res.render('404', { 
+//                 pageTitle: "Category Not Found",
+//                 isLoggedIn: req.session?.isLoggedIn || false 
+//             });
+//         }
+
+//         // Us category ke products find karo
+//         const products = await Product.find({ category: category._id });
+
+//         // BRAND LOGIC: Products se brand nikalna
+//         const uniqueBrands = [...new Set(products.map(p => p.brand))];
+        
+//         const brandData = uniqueBrands.map(brandName => {
+//             const productWithImage = products.find(p => p.brand === brandName);
+//             return { 
+//                 name: brandName, 
+//                 imageUrl: (productWithImage && productWithImage.images && productWithImage.images.length > 0) 
+//                            ? productWithImage.images[0] 
+//                            : '/images/placeholder.jpg' 
+//             };
+//         });
+
+//         // NAYA BRAND LOGIC: Database ke 'brands' array se data nikalna
+//         const dbBrands = (category.brands && category.brands.length > 0) 
+//             ? category.brands.map(b => ({ 
+//                 name: b.name, 
+//                 imageUrl: b.image || '/images/placeholder.jpg' 
+//             })) 
+//             : brandData;
+
+//         // Render category-page
+//         res.render('category-page', { 
+//             products: products, 
+//             categoryName: category.name,
+//             brandData: dbBrands,
+//             isLoggedIn: req.session?.isLoggedIn || false,
+//             user: req.session?.user || null
+//         });
+//     } catch (error) {
+//         console.error("Category Products Error:", error);
+//         next(error);
+//     }
+// };
+
+
 exports.getCategoryProducts = async (req, res, next) => {
     try {
         const categorySlug = req.params.categoryName; 
@@ -1801,8 +1856,8 @@ exports.getCategoryProducts = async (req, res, next) => {
             return { 
                 name: brandName, 
                 imageUrl: (productWithImage && productWithImage.images && productWithImage.images.length > 0) 
-                           ? productWithImage.images[0] 
-                           : '/images/placeholder.jpg' 
+                            ? productWithImage.images[0] 
+                            : '/images/placeholder.jpg' 
             };
         });
 
@@ -1814,19 +1869,22 @@ exports.getCategoryProducts = async (req, res, next) => {
             })) 
             : brandData;
 
-        // Render category-page
+        // --- FULL UPDATED RENDER ---
         res.render('category-page', { 
             products: products, 
+            category: category,           // <--- YE ADD KIYA HAI
             categoryName: category.name,
             brandData: dbBrands,
             isLoggedIn: req.session?.isLoggedIn || false,
             user: req.session?.user || null
         });
+        
     } catch (error) {
         console.error("Category Products Error:", error);
         next(error);
     }
 };
+
 
 exports.getViewProduct = async (req, res, next) => {
     const prodId = req.params.id;
@@ -1880,27 +1938,34 @@ exports.getBrandProducts = async (req, res, next) => {
 
 
 
-const Order = require('../model/orderSchema'); // Tumhara import line
 
-// controller/userController.js
-
-exports.getOrderHistory = async (req, res, next) => {
+exports.filterProductsByGender = async (req, res) => {
     try {
-        if (!req.session || !req.session.user) {
-            return res.redirect('/login'); 
+        let { gender, categoryId } = req.query; // Yahan 'laptops' aa raha hai
+        
+        console.log("DEBUG - Received:", { gender, categoryId });
+
+        // 1. Pehle category naam se uska actual _id dhundo
+        const categoryDoc = await Category.findOne({ name: { $regex: new RegExp(`^${categoryId}$`, 'i') } });
+        
+        if (!categoryDoc) {
+            return res.status(404).json({ success: false, message: "Category not found" });
         }
 
-        const userId = req.session.user._id;
-        const orders = await Order.find({ userId: userId }).sort({ createdAt: -1 });
+        // 2. Ab ID mil gayi, filter banao
+        let filter = { category: categoryDoc._id };
 
-        // Yahan file ka naam exact 'orderHistory' rakho
-        res.render('orderHistory', { 
-            orders: orders || [],
-            isLoggedIn: req.session.isLoggedIn || false,
-            user: req.session.user
-        });
+        // 3. Gender filter
+        if (gender && gender !== 'all') {
+            filter.gender = { $regex: new RegExp(`^${gender}$`, 'i') };
+        }
+
+        const products = await Product.find(filter);
+        
+        console.log("DEBUG - Found count:", products.length);
+        res.status(200).json({ success: true, products: products });
     } catch (err) {
-        console.error("Error in getOrderHistory:", err);
-        next(err);
+        console.error("Controller Error:", err);
+        res.status(500).json({ success: false, message: err.message });
     }
 };

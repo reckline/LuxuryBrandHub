@@ -2,6 +2,7 @@
 <%- include('../partials/adminNavBar') %> 
 
 <main class="main-content">
+
   <!-- ======================== Add Brands ============================================= -->
 <div class="max-w-8xl mx-auto bg-white p-2 rounded-2xl shadow-xl border border-gray-100 mb-10">
     <div class="flex items-center justify-between mb-8">
@@ -54,6 +55,43 @@
 </div>
 </div>
 </div>
+
+<!-- ====================================================== Filter ======================================================== -->
+<form action="/admin/update-category-filter/<%= category._id %>" method="POST">
+    <div class="p-6 bg-white border-2 border-gray-200 rounded-2xl mb-6">
+        <h3 class="font-bold text-lg mb-4">Category Filter Settings</h3>
+
+        <div class="mb-6">
+            <label class="block font-semibold text-gray-700 mb-2">Enable Gender Filter:</label>
+            <div class="flex justify-between">
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="isGenderFilterEnabled" value="true" 
+                           <%= category.isGenderFilterEnabled ? 'checked' : '' %> 
+                           class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                    <span class="ml-2 text-green-600 font-bold">Active</span>
+                </label>
+                
+                <label class="flex items-center cursor-pointer">
+                    <input type="radio" name="isGenderFilterEnabled" value="false" 
+                           <%= !category.isGenderFilterEnabled ? 'checked' : '' %> 
+                           class="w-4 h-4 text-red-600 focus:ring-red-500">
+                    <span class="ml-2 text-red-600 font-bold">Inactive</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-4 flex justify-between">
+            <span class="text-gray-600">Current Status: </span>
+            <span class="px-3 py-1 rounded-full text-sm font-bold <%= category.isGenderFilterEnabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                <%= category.isGenderFilterEnabled ? 'Active' : 'Inactive' %>
+            </span>
+        </div>
+
+        <button type="submit" class="bg-blue-600 w-full text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            Save Status
+        </button>
+    </div>
+</form>
   <!-- ==================================================== Add Size ======================================================= -->
 <div class="bg-white p-6 mb-6 rounded-3xl border border-gray-100 shadow-sm space-y-6">
     <div>
@@ -527,7 +565,27 @@ async function deleteSize(categoryId, sizeName) {
 
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('genderToggle');
+        const dropdown = document.getElementById('gender'); // Tumhare select ka ID 'gender' hai
 
+        // Sirf tabhi code chale agar dono elements mil jayein
+        if (toggle && dropdown) {
+            toggle.addEventListener('change', function() {
+                if (this.checked) {
+                    dropdown.disabled = true;
+                    dropdown.classList.add('opacity-50'); // Disable hone par halka dikhaye
+                } else {
+                    dropdown.disabled = false;
+                    dropdown.classList.remove('opacity-50');
+                }
+            });
+        } else {
+            console.warn("Toggle ya Dropdown nahi mila, check your HTML IDs.");
+        }
+    });
+</script>
 
 
   </body>
